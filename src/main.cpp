@@ -1,7 +1,7 @@
 #include "imgui.h"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_sdlrenderer3.h"
-#include <stdio.h>
+#include <iostream>
 #include <SDL3/SDL.h>
 
 // Main code
@@ -15,7 +15,7 @@ int main(int, char**) {
     // Create window with SDL_Renderer graphics context
     float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
     SDL_WindowFlags window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY;
-    SDL_Window* window = SDL_CreateWindow("Dear ImGui SDL3+SDL_Renderer example", (int)(1280 * main_scale), (int)(800 * main_scale), window_flags);
+    SDL_Window* window = SDL_CreateWindow("GameBoy Emulator", (int)(1280 * main_scale), (int)(800 * main_scale), window_flags);
     if (window == nullptr) {
         printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
         return 1;
@@ -47,8 +47,8 @@ int main(int, char**) {
     ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer3_Init(renderer);
 
-    // Our state
-    bool show_demo_window = true;
+    // Initial state
+    bool show_demo_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Main loop
@@ -74,22 +74,26 @@ int main(int, char**) {
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
 
-        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-        if (show_demo_window)
-            ImGui::ShowDemoWindow(&show_demo_window);
-
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
+        // Show a simple window that we create ourselves. We use a Begin/End pair to create a named window. Always at (0, 0)
+        ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
         {
-            ImGui::Begin("GameBoy Emulator");
+            ImGui::Begin("Settings");
 
-            ImGui::Text("Finestre.");               
+            ImGui::Text("Windows:");               
             ImGui::Checkbox("Demo Window", &show_demo_window);
-
-            ImGui::ColorEdit3("clear color", (float*)&clear_color);
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
             ImGui::End();
         }
+
+        {
+            ImGui::Begin("Video output:");
+            //TODO: Actually do something
+            ImGui::End();
+        }
+
+        if (show_demo_window) //Demo Window of ImGui, I'll keep it for now
+            ImGui::ShowDemoWindow(&show_demo_window);
 
         // Rendering
         ImGui::Render();
@@ -100,7 +104,7 @@ int main(int, char**) {
         SDL_RenderPresent(renderer);
     }
 
-    //Loop end
+    // Loop end
     ImGui_ImplSDLRenderer3_Shutdown();
     ImGui_ImplSDL3_Shutdown();
     ImGui::DestroyContext();
