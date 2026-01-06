@@ -1,8 +1,9 @@
 #include "imgui.h"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_sdlrenderer3.h"
-#include <iostream>
 #include <SDL3/SDL.h>
+#include <iostream>
+#include <gb.h>
 
 // Main code
 int main(int, char**) {
@@ -47,9 +48,13 @@ int main(int, char**) {
     ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer3_Init(renderer);
 
-    // Initial state
+    // Initial windows state
     bool show_demo_window = false;
+    bool show_registers = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+    //setup GB Emu
+    Gb gb;
 
     // Main loop
     bool done = false;
@@ -81,6 +86,7 @@ int main(int, char**) {
 
             ImGui::Text("Windows:");               
             ImGui::Checkbox("Demo Window", &show_demo_window);
+            ImGui::Checkbox("Registers", &show_registers);
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
             ImGui::End();
@@ -89,6 +95,45 @@ int main(int, char**) {
         {
             ImGui::Begin("Video output:");
             //TODO: Actually do something
+            ImGui::End();
+        }
+
+        if (show_registers) {
+            ImGui::Begin("Registers",NULL ,ImGuiWindowFlags_NoResize);
+
+            if (ImGui::BeginTable("RegistersTable", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit)) {
+                ImGui::TableSetupColumn("Register");
+                ImGui::TableSetupColumn("Value");
+                ImGui::TableHeadersRow();
+
+                auto addWRegisterRow = [](const char* name, uint16_t value) { //Function to add 16 bits registers rows
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::Text("%s", name);
+                    ImGui::TableNextColumn();
+                    ImGui::Text("0x%04X", value);
+                };
+
+                auto addBRegisterRow = [](const char* name, uint8_t value) { //Function to add 8 bits registers rows
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::Text("%s", name);
+                    ImGui::TableNextColumn();
+                    ImGui::Text("0x%02X", value);
+                };
+
+                addWRegisterRow("PC", gb.cpu.registers.pc);
+                addWRegisterRow("SP", gb.cpu.registers.sp);
+                addBRegisterRow("IR", gb.cpu.registers.ir);
+                addBRegisterRow("IE", gb.cpu.registers.ie);
+                addWRegisterRow("AF", gb.cpu.registers.af); // TODO: Representing the FLAG Register as boolean values.
+                addWRegisterRow("BC", gb.cpu.registers.bc);
+                addWRegisterRow("DE", gb.cpu.registers.de);
+                addWRegisterRow("HL", gb.cpu.registers.hl);
+
+                ImGui::EndTable();
+            }
+
             ImGui::End();
         }
 
