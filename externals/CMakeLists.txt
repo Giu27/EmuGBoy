@@ -13,6 +13,7 @@ add_library(imgui STATIC
 target_include_directories(imgui PUBLIC
     imgui
     imgui/backends
+    imgui_memory_editor
 )
 
 target_link_libraries(imgui PUBLIC SDL3::SDL3)

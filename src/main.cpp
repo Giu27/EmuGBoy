@@ -1,9 +1,12 @@
 #include "imgui.h"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_sdlrenderer3.h"
+#include "imgui_memory_editor.h"
 #include <SDL3/SDL.h>
 #include <iostream>
 #include <gb.h>
+
+static MemoryEditor mem_edit;
 
 // Main code
 int main(int, char**) {
@@ -51,6 +54,7 @@ int main(int, char**) {
     // Initial windows state
     bool show_demo_window = false;
     bool show_registers = false;
+    bool show_memory = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     //setup GB Emu
@@ -82,11 +86,12 @@ int main(int, char**) {
         // Show a simple window that we create ourselves. We use a Begin/End pair to create a named window. Always at (0, 0)
         ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
         {
-            ImGui::Begin("Settings");
+            ImGui::Begin("Settings", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize);
 
             ImGui::Text("Windows:");               
             ImGui::Checkbox("Demo Window", &show_demo_window);
             ImGui::Checkbox("Registers", &show_registers);
+            ImGui::Checkbox("Memory", &show_memory);
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
             ImGui::End();
@@ -99,7 +104,7 @@ int main(int, char**) {
         }
 
         if (show_registers) {
-            ImGui::Begin("Registers",NULL ,ImGuiWindowFlags_NoResize);
+            ImGui::Begin("Registers", NULL, ImGuiWindowFlags_NoResize);
 
             if (ImGui::BeginTable("RegistersTable", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit)) {
                 ImGui::TableSetupColumn("Register");
@@ -135,6 +140,10 @@ int main(int, char**) {
             }
 
             ImGui::End();
+        }
+
+        if (show_memory) {
+            mem_edit.DrawWindow("Memory", gb.memory, MEMORY_SIZE);
         }
 
         if (show_demo_window) //Demo Window of ImGui, I'll keep it for now
