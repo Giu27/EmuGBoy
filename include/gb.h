@@ -23,4 +23,6 @@ class Gb{
     public:
         Cpu cpu;
         uint8_t memory [MEMORY_SIZE] = {0};
+
+        
 };

@@ -4,6 +4,7 @@
 #include "imgui_memory_editor.h"
 #include <SDL3/SDL.h>
 #include <iostream>
+#include <utils.h>
 #include <gb.h>
 
 static MemoryEditor mem_edit;
@@ -104,14 +105,14 @@ int main(int, char**) {
         }
 
         if (show_registers) {
-            ImGui::Begin("Registers", NULL, ImGuiWindowFlags_NoResize);
+            ImGui::Begin("Registers", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
 
             if (ImGui::BeginTable("RegistersTable", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit)) {
                 ImGui::TableSetupColumn("Register");
                 ImGui::TableSetupColumn("Value");
                 ImGui::TableHeadersRow();
 
-                auto addWRegisterRow = [](const char* name, uint16_t value) { //Function to add 16 bits registers rows
+                auto addWRegisterRow = [](const char* name, uint16_t value) { //Function to add 16 bits registers rows to a table
                     ImGui::TableNextRow();
                     ImGui::TableNextColumn();
                     ImGui::Text("%s", name);
@@ -119,7 +120,7 @@ int main(int, char**) {
                     ImGui::Text("0x%04X", value);
                 };
 
-                auto addBRegisterRow = [](const char* name, uint8_t value) { //Function to add 8 bits registers rows
+                auto addBRegisterRow = [](const char* name, uint8_t value) { //Function to add 8 bits registers rows to a table
                     ImGui::TableNextRow();
                     ImGui::TableNextColumn();
                     ImGui::Text("%s", name);
@@ -127,14 +128,26 @@ int main(int, char**) {
                     ImGui::Text("0x%02X", value);
                 };
 
+                auto addFRegisterRow = [](const char* name, bool value) { //Function to add Flags rows to a table
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::Text("%s", name);
+                    ImGui::TableNextColumn();
+                    ImGui::Text("0b%d", value);
+                };
+
                 addWRegisterRow("PC", gb.cpu.registers.pc);
                 addWRegisterRow("SP", gb.cpu.registers.sp);
                 addBRegisterRow("IR", gb.cpu.registers.ir);
                 addBRegisterRow("IE", gb.cpu.registers.ie);
-                addWRegisterRow("AF", gb.cpu.registers.af); // TODO: Representing the FLAG Register as boolean values.
+                addBRegisterRow("A", gb.cpu.registers.a); 
                 addWRegisterRow("BC", gb.cpu.registers.bc);
                 addWRegisterRow("DE", gb.cpu.registers.de);
                 addWRegisterRow("HL", gb.cpu.registers.hl);
+                addFRegisterRow("z", getBit(gb.cpu.registers.f, 7));
+                addFRegisterRow("n", getBit(gb.cpu.registers.f, 6));
+                addFRegisterRow("h", getBit(gb.cpu.registers.f, 5));
+                addFRegisterRow("c", getBit(gb.cpu.registers.f, 4));
 
                 ImGui::EndTable();
             }
@@ -146,8 +159,9 @@ int main(int, char**) {
             mem_edit.DrawWindow("Memory", gb.memory, MEMORY_SIZE);
         }
 
-        if (show_demo_window) //Demo Window of ImGui, I'll keep it for now
+        if (show_demo_window) {//Demo Window of ImGui, I'll keep it for now
             ImGui::ShowDemoWindow(&show_demo_window);
+        }
 
         // Rendering
         ImGui::Render();
