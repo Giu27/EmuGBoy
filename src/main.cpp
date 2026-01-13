@@ -60,6 +60,7 @@ int main(int, char**) {
 
     //setup GB Emu
     Gb gb;
+    gb.load_rom("roms/Tetris.gb");
 
     // Main loop
     bool done = false;
@@ -112,7 +113,7 @@ int main(int, char**) {
                 ImGui::TableSetupColumn("Value");
                 ImGui::TableHeadersRow();
 
-                auto addWRegisterRow = [](const char* name, uint16_t value) { //Function to add 16 bits registers rows to a table
+                auto addWRegisterRow = [](const std::string name, uint16_t value) { //Function to add 16 bits registers rows to a table
                     ImGui::TableNextRow();
                     ImGui::TableNextColumn();
                     ImGui::Text("%s", name);
@@ -120,7 +121,7 @@ int main(int, char**) {
                     ImGui::Text("0x%04X", value);
                 };
 
-                auto addBRegisterRow = [](const char* name, uint8_t value) { //Function to add 8 bits registers rows to a table
+                auto addBRegisterRow = [](const std::string name, uint8_t value) { //Function to add 8 bits registers rows to a table
                     ImGui::TableNextRow();
                     ImGui::TableNextColumn();
                     ImGui::Text("%s", name);
@@ -128,7 +129,7 @@ int main(int, char**) {
                     ImGui::Text("0x%02X", value);
                 };
 
-                auto addFRegisterRow = [](const char* name, bool value) { //Function to add Flags rows to a table
+                auto addFRegisterRow = [](const std::string name, bool value) { //Function to add Flags rows to a table
                     ImGui::TableNextRow();
                     ImGui::TableNextColumn();
                     ImGui::Text("%s", name);

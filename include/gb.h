@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <sm83.h>
 
 #define MEMORY_SIZE 0x10000
@@ -24,5 +25,5 @@ class Gb{
         Cpu cpu;
         uint8_t memory [MEMORY_SIZE] = {0};
 
-        
+        void load_rom(std::string path);
 };
