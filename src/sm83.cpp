@@ -17,9 +17,16 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
         case 0x00: //NOP
             cycles += 4;
             break;
+        
+        case 0x01: //LD BC nn
+            registers.bc = bytesToWord(gb->readMemory(registers.pc), gb->readMemory(registers.pc + 1));
+            registers.pc += 2;
+            cycles += 12;
+            break;
 
         case 0x31: //LD SP n16
             registers.sp = bytesToWord(gb->readMemory(registers.pc), gb->readMemory(registers.pc + 1));
+            registers.pc += 2;
             cycles += 12;
             break;
 
@@ -66,4 +73,42 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
     }
 
     return cycles;
+}
+
+void Cpu::setFlag(char flag) {
+    int bit;
+    switch (flag) {
+        case 'z':
+            bit = 7;
+            break;
+        case 'n':
+            bit = 6;
+            break;
+        case 'h':
+            bit = 5;
+            break;
+        case 'c':
+            bit = 4;
+            break;
+        setBit(registers.f, bit);
+    }
+}
+
+void Cpu::clearFlag(char flag) {
+    int bit;
+    switch (flag) {
+        case 'z':
+            bit = 7;
+            break;
+        case 'n':
+            bit = 6;
+            break;
+        case 'h':
+            bit = 5;
+            break;
+        case 'c':
+            bit = 4;
+            break;
+        clearBit(registers.f, bit);
+    }
 }
