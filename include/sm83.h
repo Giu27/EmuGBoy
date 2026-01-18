@@ -44,8 +44,7 @@ class Cpu {
     
         Cpu(Gb* parent);
         int step();
-        void setFlag(char flag);
-        void clearFlag(char flag);
+        void setFlag(char flag, bool val);
 
     private: 
         Gb* gb;
