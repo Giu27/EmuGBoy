@@ -10,10 +10,10 @@ Cpu::Cpu(Gb* parent) : gb(parent){
 
 int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
     int cycles = 0;
-    opcode = gb->readMemory(registers.pc);
+    registers.ir = gb->readMemory(registers.pc);
     registers.pc++;
 
-    switch (opcode) {
+    switch (registers.ir) {
         case 0x00: //NOP
             cycles += 4;
             break;
@@ -61,7 +61,7 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             break;
     
         default:
-            std::cout<<std::hex<<(int)opcode<<"\n";
+            std::cout<<std::hex<<(int)registers.ir<<"\n";
             break;
     }
 

@@ -41,8 +41,6 @@ class Cpu {
             uint16_t& de = DE.reg;
             uint16_t& hl = HL.reg;
         } registers = {0};
-
-        uint8_t opcode;
     
         Cpu(Gb* parent);
         int step();
