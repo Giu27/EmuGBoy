@@ -57,7 +57,7 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
         
         case 0xC3: //JP nn
             registers.pc = bytesToWord(gb->readMemory(registers.pc), gb->readMemory(registers.pc + 1));
-            cycles += 4;
+            cycles += 16;
             break;
     
         default:
