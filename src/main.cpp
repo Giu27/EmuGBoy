@@ -54,7 +54,6 @@ int main(int, char**) {
     ImGui_ImplSDLRenderer3_Init(renderer);
 
     // Initial windows state
-    bool show_demo_window = false;
     bool show_registers = true;
     bool show_memory = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
@@ -97,7 +96,6 @@ int main(int, char**) {
             //TODO: Move rom selector here
 
             ImGui::Text("Windows:");               
-            ImGui::Checkbox("Demo Window", &show_demo_window);
             ImGui::Checkbox("Registers", &show_registers);
             ImGui::Checkbox("Memory", &show_memory);
 
@@ -164,10 +162,6 @@ int main(int, char**) {
 
         if (show_memory) {
             mem_edit.DrawWindow("Memory", gb.memory, MEMORY_SIZE);
-        }
-
-        if (show_demo_window) {//Demo Window of ImGui, I'll keep it for now
-            ImGui::ShowDemoWindow(&show_demo_window);
         }
 
         // Rendering
