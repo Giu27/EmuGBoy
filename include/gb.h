@@ -1,3 +1,4 @@
+//Copyright (C) 2026  Giuseppe Caruso
 #pragma once
 
 #include <string>
@@ -20,10 +21,14 @@ FF80 to FFFE: HRAM
 FFFF to FFFF: IE Register
 */
 
-class Gb{
+class Gb {
     public:
         Cpu cpu;
         uint8_t memory [MEMORY_SIZE] = {0};
 
-        void load_rom(std::string path);
+        void loadRom(std::string path);
+        uint8_t readMemory(uint16_t addr);
+        void writeMemory(uint16_t addr, uint8_t value);
+
+        Gb();
 };

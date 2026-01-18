@@ -1,6 +1,9 @@
+//Copyright (C) 2026  Giuseppe Caruso
 #pragma once
 
 #include <cstdint>
+
+class Gb;
 
 union RegisterPair { // Many registers can be accessed as one 16 bits register or as two 8 bits halves.
     uint16_t reg;
@@ -38,6 +41,11 @@ class Cpu {
             uint16_t& de = DE.reg;
             uint16_t& hl = HL.reg;
         } registers = {0};
+
+        uint8_t opcode;
     
-        Cpu();
+        Cpu(Gb* parent);
+        int step();
+    private: 
+        Gb* gb;
 };

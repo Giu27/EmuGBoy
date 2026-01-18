@@ -1,3 +1,4 @@
+//Copyright (C) 2026  Giuseppe Caruso
 #include "imgui.h"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_sdlrenderer3.h"
@@ -54,13 +55,14 @@ int main(int, char**) {
 
     // Initial windows state
     bool show_demo_window = false;
-    bool show_registers = false;
+    bool show_registers = true;
     bool show_memory = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     //setup GB Emu
     Gb gb;
-    gb.load_rom("roms/Tetris.gb");
+    gb.loadRom("roms/Tetris.gb");
+    int cycles = 0;
 
     // Main loop
     bool done = false;
@@ -80,6 +82,8 @@ int main(int, char**) {
             continue;
         }
 
+        cycles = gb.cpu.step();
+
         // Start the Dear ImGui frame
         ImGui_ImplSDLRenderer3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
@@ -88,7 +92,9 @@ int main(int, char**) {
         // Show a simple window that we create ourselves. We use a Begin/End pair to create a named window. Always at (0, 0)
         ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
         {
-            ImGui::Begin("Settings", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize);
+            ImGui::Begin("EmuGBoy", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize);
+
+            //TODO: Move rom selector here
 
             ImGui::Text("Windows:");               
             ImGui::Checkbox("Demo Window", &show_demo_window);
@@ -113,7 +119,7 @@ int main(int, char**) {
                 ImGui::TableSetupColumn("Value");
                 ImGui::TableHeadersRow();
 
-                auto addWRegisterRow = [](const std::string name, uint16_t value) { //Function to add 16 bits registers rows to a table
+                auto addWRegisterRow = [](const char* name, uint16_t value) { //Function to add 16 bits registers rows to a table
                     ImGui::TableNextRow();
                     ImGui::TableNextColumn();
                     ImGui::Text("%s", name);
@@ -121,7 +127,7 @@ int main(int, char**) {
                     ImGui::Text("0x%04X", value);
                 };
 
-                auto addBRegisterRow = [](const std::string name, uint8_t value) { //Function to add 8 bits registers rows to a table
+                auto addBRegisterRow = [](const char* name, uint8_t value) { //Function to add 8 bits registers rows to a table
                     ImGui::TableNextRow();
                     ImGui::TableNextColumn();
                     ImGui::Text("%s", name);
@@ -129,7 +135,7 @@ int main(int, char**) {
                     ImGui::Text("0x%02X", value);
                 };
 
-                auto addFRegisterRow = [](const std::string name, bool value) { //Function to add Flags rows to a table
+                auto addFRegisterRow = [](const char* name, bool value) { //Function to add Flags rows to a table
                     ImGui::TableNextRow();
                     ImGui::TableNextColumn();
                     ImGui::Text("%s", name);
