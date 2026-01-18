@@ -1,5 +1,6 @@
 //Copyright (C) 2026  Giuseppe Caruso
 #include <iostream>
+#include <vector>
 #include <fstream>
 #include <utils.h>
 #include <gb.h>
@@ -16,10 +17,10 @@ void Gb::loadRom(std::string path) { //Reads bytes from the rom and load it in m
     }
 
     std::streamsize size = file.tellg();
-    char buffer[size];
+    std::vector<char> buffer(size);
 
     file.seekg(0, std::ios::beg);
-    file.read(buffer, size);
+    file.read(reinterpret_cast<char*>(buffer.data()), size);
 	file.close();
 
     for (unsigned int i = 0; i < size; i++) {
