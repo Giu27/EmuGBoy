@@ -23,6 +23,12 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             registers.pc += 2;
             cycles += 12;
             break;
+        
+        case 0x2F: //CPL
+            registers.a = ~registers.a;
+            setFlag('n');
+            setFlag('h');
+            break;
 
         case 0x31: //LD SP n16
             registers.sp = bytesToWord(gb->readMemory(registers.pc), gb->readMemory(registers.pc + 1));
@@ -90,8 +96,8 @@ void Cpu::setFlag(char flag) {
         case 'c':
             bit = 4;
             break;
-        setBit(registers.f, bit);
     }
+    setBit(registers.f, bit);
 }
 
 void Cpu::clearFlag(char flag) {
@@ -109,6 +115,6 @@ void Cpu::clearFlag(char flag) {
         case 'c':
             bit = 4;
             break;
-        clearBit(registers.f, bit);
     }
+    clearBit(registers.f, bit);
 }
