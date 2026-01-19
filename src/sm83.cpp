@@ -4,8 +4,17 @@
 #include <utils.h>
 #include <sm83.h>
 
-Cpu::Cpu(Gb* parent) : gb(parent){
+Cpu::Cpu(Gb* parent) : gb(parent){ //Initial Values
     registers.pc = 0x0100; 
+    registers.sp = 0xFFFE;
+    registers.l = 0x4D;
+    registers.h = 0x01;
+    registers.e = 0xD8;
+    registers.d = 0x00;
+    registers.c = 0x13;
+    registers.b = 0x00;
+    registers.a = 0x01;
+    setFlag('z', true);
 }
 
 int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
@@ -154,6 +163,26 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             cycles += 8;
             break;
 
+        case 0x14:{//INC D
+            bool h = (registers.d & 0x0F) == 0x0F;
+            registers.d++;
+            setFlag('n', false);
+            setFlag('z', registers.d == 0);
+            setFlag('h', h);
+            cycles += 4;
+            break;
+        }
+
+        case 0x1C:{//INC E
+            bool h = (registers.e & 0x0F) == 0x0F;
+            registers.e++;
+            setFlag('n', false);
+            setFlag('z', registers.e == 0);
+            setFlag('h', h);
+            cycles += 4;
+            break;
+        }
+
         case 0x20:{//JR CC e
             int8_t e = gb->readMemory(registers.pc);
             registers.pc++;
@@ -169,6 +198,12 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             registers.hl = bytesToWord(gb->readMemory(registers.pc), gb->readMemory(registers.pc + 1));
             registers.pc += 2;
             cycles += 12;
+            break;
+        
+        case 0x2a: //LD A [HL+]
+            registers.a = gb->readMemory(registers.hl);
+            registers.hl++;
+            cycles += 8;
             break;
 
         case 0x2F: //CPL

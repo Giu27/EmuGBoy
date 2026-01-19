@@ -56,13 +56,13 @@ int main(int, char**) {
     // Initial windows state
     bool show_registers = true;
     bool show_memory = false;
-    bool single_stepping = false;
+    bool single_stepping = true;
     bool step = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     //setup GB Emu
     Gb gb;
-    gb.loadRom("roms/Tetris.gb");
+    gb.loadRom("roms/test_roms/blargg/cpu_instrs/individual/01-special.gb");
     int cycles = 0;
 
     // Main loop

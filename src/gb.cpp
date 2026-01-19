@@ -26,12 +26,21 @@ void Gb::loadRom(std::string path) { //Reads bytes from the rom and load it in m
     for (unsigned int i = 0; i < size; i++) {
 		memory[i] = buffer[i];
 	}
+
+    if (memory[0x014D] != 0x00) {
+        cpu.setFlag('c', true);
+        cpu.setFlag('h', true);
+    }
 }
 
 uint8_t Gb::readMemory(uint16_t addr) {
+    if (addr == 0xFF44) return 0x90; //Temporary as well to force LY register
     return memory[addr]; //Temporary, will need to be replaced by a proper handling
 }
 
 void Gb::writeMemory(uint16_t addr, uint8_t value) {
+    if (addr == 0xFF02 && value == 0x81) {
+        std::cout<<(char)memory[0xFF01]<<std::endl;
+    }
     memory[addr] = value; //Temporary, will need to be replaced by a proper handling
 }
