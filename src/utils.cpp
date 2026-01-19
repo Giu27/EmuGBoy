@@ -16,3 +16,11 @@ void clearBit(uint8_t &b, int pos) {
 uint16_t bytesToWord(uint8_t lsb, uint8_t msb) {
      return ((uint16_t)msb << 8) | lsb;
 }
+
+uint8_t getLSB(uint16_t val){
+    return (uint8_t) (val & 0x00FF);
+}
+
+uint8_t getMSB(uint16_t val){
+    return (uint8_t) (val >> 8) & 0xFF;
+}

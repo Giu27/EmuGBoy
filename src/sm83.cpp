@@ -43,7 +43,43 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             cycles += 4;
             break;
         }
+
+        case 0x05: {//DEC B
+            bool h = (registers.b & 0x0F) == 0;
+            registers.b--;
+            setFlag('n', true);
+            setFlag('z', registers.b == 0);
+            setFlag('h', h);
+            cycles += 4;
+            break;
+        }
+
+        case 0x06: //LD B n
+            registers.b = gb->readMemory(registers.pc);
+            registers.pc++;
+            cycles += 8;
+            break;
         
+        case 0x07: {//RLCA
+            uint8_t b7 = getBit(registers.a, 7);
+            registers.a = (registers.a << 1) | b7;
+            setFlag('z', false);
+            setFlag('n', false);
+            setFlag('h', false);
+            setFlag('c', b7);
+            cycles += 4;
+            break;
+        }
+
+        case 0x08:{ //LD [a16] SP
+            uint16_t nn = bytesToWord(gb->readMemory(registers.pc),gb->readMemory(registers.pc + 1));
+            registers.pc += 2;
+            gb->writeMemory(nn, getLSB(registers.sp));
+            gb->writeMemory(nn + 1, getMSB(registers.sp));
+            cycles += 20;
+            break;
+        }
+
         case 0x09: {//ADD HL BC
             uint32_t result = registers.hl + registers.bc;
             bool h = ((registers.hl & 0xFFF) + (registers.bc & 0xFFF)) > 0xFFF;

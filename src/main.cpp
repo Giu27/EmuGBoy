@@ -56,6 +56,8 @@ int main(int, char**) {
     // Initial windows state
     bool show_registers = true;
     bool show_memory = false;
+    bool single_stepping = false;
+    bool step = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     //setup GB Emu
@@ -81,7 +83,10 @@ int main(int, char**) {
             continue;
         }
 
-        cycles = gb.cpu.step();
+        if (!single_stepping || step) {
+            cycles = gb.cpu.step();
+        }
+        
 
         // Start the Dear ImGui frame
         ImGui_ImplSDLRenderer3_NewFrame();
@@ -98,6 +103,14 @@ int main(int, char**) {
             ImGui::Text("Windows:");               
             ImGui::Checkbox("Registers", &show_registers);
             ImGui::Checkbox("Memory", &show_memory);
+            ImGui::Text("Other tools:");
+            ImGui::Checkbox("Pause Emulation", &single_stepping);
+            ImGui::SameLine();
+            if (ImGui::Button("step")) {
+                step = true;
+            } else {
+                step = false;
+            }
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
             ImGui::End();
