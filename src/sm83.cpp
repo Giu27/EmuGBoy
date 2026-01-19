@@ -154,7 +154,7 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             break;
         
         case 0x12: //LD [DE] A
-            gb->writeMemory(registers.bc, registers.a);
+            gb->writeMemory(registers.de, registers.a);
             cycles += 8;
             break;
 
@@ -184,7 +184,7 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
         }
 
         case 0x20:{//JR CC e
-            int8_t e = gb->readMemory(registers.pc);
+            int8_t e = (int8_t) gb->readMemory(registers.pc);
             registers.pc++;
             if (!getFlag('z')) {
                 registers.pc += e;
@@ -200,7 +200,7 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             cycles += 12;
             break;
         
-        case 0x2a: //LD A [HL+]
+        case 0x2A: //LD A [HL+]
             registers.a = gb->readMemory(registers.hl);
             registers.hl++;
             cycles += 8;
@@ -263,6 +263,11 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             cycles += 4;
             break;
         
+        case 0x78: //LD A r8
+            registers.a = registers.b;
+            cycles += 4;
+            break;
+        
         case 0xAF: //XOR A A
             registers.a = 0;
             setFlag('z', true);
@@ -272,6 +277,15 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             cycles += 4;
             break;
         
+        case 0xC0: //RET NZ
+            if (!getFlag('z')) {
+                registers.pc = bytesToWord(gb->readMemory(registers.sp), gb->readMemory(registers.sp + 1));
+                registers.sp += 2;
+                cycles += 12;
+            }
+            cycles += 8;
+            break;
+
         case 0xC3: //JP nn
             registers.pc = bytesToWord(gb->readMemory(registers.pc), gb->readMemory(registers.pc + 1));
             cycles += 16;
