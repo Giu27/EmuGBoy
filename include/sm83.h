@@ -41,6 +41,7 @@ class Cpu {
             uint16_t& de = DE.reg;
             uint16_t& hl = HL.reg;
         } registers = {0};
+        bool IME; //Interrupt Master Enable
     
         Cpu(Gb* parent);
         int step();

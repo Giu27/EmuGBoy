@@ -39,8 +39,11 @@ uint8_t Gb::readMemory(uint16_t addr) {
 }
 
 void Gb::writeMemory(uint16_t addr, uint8_t value) {
-    if (addr == 0xFF02 && value == 0x81) {
+    if (addr == 0xFF02 && value == 0x81) { //Intercepts serial output
         std::cout<<(char)memory[0xFF01]<<std::endl;
+    }
+    if (addr >= 0xC000 && addr <= 0xDDFF) { //Echoes in echo RAM
+        memory[addr + 0x2000] = value;
     }
     memory[addr] = value; //Temporary, will need to be replaced by a proper handling
 }
