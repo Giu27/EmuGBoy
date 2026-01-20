@@ -216,6 +216,22 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             break;
         }
 
+        case 0x15:{//DEC D
+            bool h = (registers.d & 0x0F) == 0;
+            registers.d--;
+            setFlag('n', true);
+            setFlag('z', registers.d == 0);
+            setFlag('h', h);
+            cycles += 4;
+            break;
+        }
+
+        case 0x16: //LD D n
+            registers.d = gb->readMemory(registers.pc);
+            registers.pc++;
+            cycles += 8;
+            break;
+
         case 0x18:{//JR e8
             int8_t e = (int8_t) gb->readMemory(registers.pc);
             registers.pc++;
@@ -229,6 +245,11 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             cycles += 8;
             break;
 
+        case 0x1B: //DEC DE
+            registers.de--;
+            cycles += 8;
+            break;
+
         case 0x1C:{//INC E
             bool h = (registers.e & 0x0F) == 0x0F;
             registers.e++;
@@ -238,6 +259,22 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             cycles += 4;
             break;
         }
+
+        case 0x1D:{//DEC E
+            bool h = (registers.e & 0x0F) == 0;
+            registers.e--;
+            setFlag('n', true);
+            setFlag('z', registers.e == 0);
+            setFlag('h', h);
+            cycles += 4;
+            break;
+        }
+
+        case 0x1E: //LD E n
+            registers.e = gb->readMemory(registers.pc);
+            registers.pc++;
+            cycles += 8;
+            break;
 
         case 0x1F:{//RRA
             uint8_t b0 = getBit(registers.a, 0);
@@ -314,10 +351,26 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             cycles+=8;
             break;
         }
+
+        case 0x29:{//ADD HL HL 
+            uint32_t result = registers.hl + registers.hl;
+            bool h = ((registers.hl & 0xFFF) + (registers.hl & 0xFFF)) > 0xFFF;
+            registers.hl = (uint16_t) (result & 0xFFFF);
+            setFlag('n', false);
+            setFlag('h', h);
+            setFlag('c', result > 0xFFFF);
+            cycles += 8;
+            break;
+        }
         
         case 0x2A: //LD A [HL+]
             registers.a = gb->readMemory(registers.hl);
             registers.hl++;
+            cycles += 8;
+            break;
+
+        case 0x2B: //DEC HL
+            registers.hl--;
             cycles += 8;
             break;
         
@@ -341,6 +394,12 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             break;
         }
 
+        case 0x2E: //LD L n
+            registers.l = gb->readMemory(registers.pc);
+            registers.pc++;
+            cycles += 8;
+            break;
+
         case 0x2F: //CPL
             registers.a = ~registers.a;
             setFlag('n', true);
@@ -359,7 +418,6 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             break;
         }
 
-
         case 0x31: //LD SP nn
             registers.sp = bytesToWord(gb->readMemory(registers.pc), gb->readMemory(registers.pc + 1));
             registers.pc += 2;
@@ -372,10 +430,37 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             cycles += 8;
             break;
         
+        case 0x33: //INC SP
+            registers.sp++;
+            cycles += 8;
+            break;
+        
+        case 0x35:{//DEC [HL]
+            uint8_t data = gb->readMemory(registers.hl);
+            bool h = (data & 0x0F) == 0;
+            data--;
+            gb->writeMemory(registers.hl, data);
+            setFlag('n', true);
+            setFlag('z', data == 0);
+            setFlag('h', h);
+            cycles += 12;
+            break;
+        } 
+        
         case 0x3C:{//INC A
             bool h = (registers.a & 0x0F) == 0x0F;
             registers.a++;
             setFlag('n', false);
+            setFlag('z', registers.a == 0);
+            setFlag('h', h);
+            cycles += 4;
+            break;
+        }
+
+        case 0x3D:{//DEC A
+            bool h = (registers.a & 0x0F) == 0;
+            registers.a--;
+            setFlag('n', true);
             setFlag('z', registers.a == 0);
             setFlag('h', h);
             cycles += 4;
@@ -425,14 +510,32 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             registers.c = gb->readMemory(registers.hl);
             cycles += 8;
             break;
+        case 0x4F: //LD C A
+            registers.c = registers.a;
+            cycles += 4;
+            break;
 
         case 0x56: //LD D [HL]
             registers.d = gb->readMemory(registers.hl);
             cycles += 8;
             break;
+        case 0x57: //LD D A
+            registers.d = registers.a;
+            cycles += 4;
+            break;
+
+        case 0x5F: //LD E A
+            registers.e = registers.a;
+            cycles += 4;
+            break;
 
         case 0x60: //LD H, r8
             registers.h = registers.b;
+            cycles += 4;
+            break;
+
+        case 0x67: //LD H A
+            registers.h = registers.a;
             cycles += 4;
             break;
 
@@ -443,6 +546,41 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
         case 0x69: 
             registers.l = registers.c;
             cycles += 4;
+            break;
+        
+        case 0x6E: //LD L [HL]
+            registers.l = gb->readMemory(registers.hl);
+            cycles += 8;
+            break;
+        
+        case 0x6F: //LD L A
+            registers.l = registers.a;
+            cycles += 4;
+            break;
+
+        case 0x70: //LD [HL] r8
+            gb->writeMemory(registers.hl, registers.b);
+            cycles += 8;
+            break;
+        case 0x71:
+            gb->writeMemory(registers.hl, registers.c);
+            cycles += 8;
+            break;
+        case 0x72:
+            gb->writeMemory(registers.hl, registers.d);
+            cycles += 8;
+            break;
+        case 0x73:
+            gb->writeMemory(registers.hl, registers.e);
+            cycles += 8;
+            break;
+        case 0x74:
+            gb->writeMemory(registers.hl, registers.h);
+            cycles += 8;
+            break;
+        case 0x75:
+            gb->writeMemory(registers.hl, registers.l);
+            cycles += 8;
             break;
 
         case 0x77: //LD [HL] A
@@ -533,7 +671,7 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             cycles += 4;
             break;
         
-        case 0xB0: //OR A B
+        case 0xB0: //OR A r8
             registers.a |= registers.b;
             setFlag('z', registers.a == 0);
             setFlag('n', false);
@@ -541,14 +679,54 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             setFlag('c', false);
             cycles += 4;
             break;
-        
-        case 0xB1: //OR A C
+        case 0xB1:
             registers.a |= registers.c;
             setFlag('z', registers.a == 0);
             setFlag('n', false);
             setFlag('h', false);
             setFlag('c', false);
             cycles += 4;
+            break;
+        case 0xB2:
+            registers.a |= registers.d;
+            setFlag('z', registers.a == 0);
+            setFlag('n', false);
+            setFlag('h', false);
+            setFlag('c', false);
+            cycles += 4;
+            break;
+        case 0xB3:
+            registers.a |= registers.e;
+            setFlag('z', registers.a == 0);
+            setFlag('n', false);
+            setFlag('h', false);
+            setFlag('c', false);
+            cycles += 4;
+            break;
+        case 0xB4:
+            registers.a |= registers.h;
+            setFlag('z', registers.a == 0);
+            setFlag('n', false);
+            setFlag('h', false);
+            setFlag('c', false);
+            cycles += 4;
+            break;
+        case 0xB5:
+            registers.a |= registers.l;
+            setFlag('z', registers.a == 0);
+            setFlag('n', false);
+            setFlag('h', false);
+            setFlag('c', false);
+            cycles += 4;
+            break;
+
+        case 0xB6: //OR A [HL]
+            registers.a |= gb->readMemory(registers.hl);
+            setFlag('z', registers.a == 0);
+            setFlag('n', false);
+            setFlag('h', false);
+            setFlag('c', false);
+            cycles += 8;
             break;
 
         case 0xB7: //OR A A
@@ -558,6 +736,26 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             setFlag('c', false);
             cycles += 4;
             break;
+        
+        case 0xB9:{//CP A C
+            uint8_t result = registers.a - registers.c;
+            setFlag('z', result == 0);
+            setFlag('n', true);
+            setFlag('h', (registers.a & 0x0F) < (registers.c & 0x0F));
+            setFlag('c', registers.c > registers.a);
+            cycles += 4;
+            break;
+        }
+
+        case 0xBB:{//CP A E
+            uint8_t result = registers.a - registers.e;
+            setFlag('z', result == 0);
+            setFlag('n', true);
+            setFlag('h', (registers.a & 0x0F) < (registers.e & 0x0F));
+            setFlag('c', registers.e > registers.a);
+            cycles += 4;
+            break;
+        }
         
         case 0xC0: //RET NZ
             if (!getFlag('z')) {
@@ -573,6 +771,17 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             registers.sp += 2;
             cycles += 12;
             break;
+        
+        case 0xC2:{//JP NZ nn
+            uint16_t nn = bytesToWord(gb->readMemory(registers.pc), gb->readMemory(registers.pc + 1));
+            registers.pc += 2;
+            if (!getFlag('z')) {
+                registers.pc = nn;
+                cycles += 4;
+            }
+            cycles += 12;
+            break;
+        }
 
         case 0xC3: //JP nn
             registers.pc = bytesToWord(gb->readMemory(registers.pc), gb->readMemory(registers.pc + 1));
@@ -642,6 +851,35 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             break;
         }
 
+        case 0xCE:{//ADC A n
+            uint8_t n = gb->readMemory(registers.pc);
+            registers.pc++;
+            uint16_t result = registers.a + n + getFlag('c');
+            bool h = ((registers.a & 0x0F) + (n & 0x0F) + getFlag('c'))> 0x0F;
+            registers.a = (uint8_t) (result & 0xFF);
+            setFlag('z', result == 0);
+            setFlag('n', false);
+            setFlag('h', h);
+            setFlag('c', result > 255);
+            cycles += 8;
+            break;
+        }
+
+        case 0xD0: //RET NC
+            if (!getFlag('c')) {
+                registers.pc = bytesToWord(gb->readMemory(registers.sp), gb->readMemory(registers.sp + 1));
+                registers.sp += 2;
+                cycles += 12;
+            }
+            cycles += 8;
+            break;
+
+        case 0xD1: //POP DE
+            registers.de = bytesToWord(gb->readMemory(registers.sp), gb->readMemory(registers.sp + 1));
+            registers.sp += 2;
+            cycles += 12;
+            break;
+
         case 0xD5: //PUSH DE
             registers.sp--;
             gb->writeMemory(registers.sp, registers.d);
@@ -701,6 +939,11 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             setFlag('c', false);
             cycles += 8;
             break;
+        
+        case 0xE9: //JP HL
+            registers.pc = registers.hl;
+            cycles += 4;
+            break;
 
         case 0xEA:{//LD [a16] A
             uint16_t nn = bytesToWord(gb->readMemory(registers.pc), gb->readMemory(registers.pc + 1));
@@ -709,6 +952,16 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             cycles += 16;
             break;
         }
+
+        case 0xEE: //XOR A n
+            registers.a ^= gb->readMemory(registers.pc);
+            registers.pc++;
+            setFlag('z', registers.a == 0);
+            setFlag('n', false);
+            setFlag('h', false);
+            setFlag('c', false);
+            cycles += 8;
+            break;
 
         case 0xF0: //LDH A [a8]
             registers.a = gb->readMemory(bytesToWord(gb->readMemory(registers.pc), 0xFF));

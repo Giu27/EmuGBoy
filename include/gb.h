@@ -26,6 +26,8 @@ class Gb {
         Cpu cpu;
         uint8_t memory [MEMORY_SIZE] = {0};
 
+        uint16_t internal_counter;
+
         void loadRom(std::string path);
         uint8_t readMemory(uint16_t addr);
         void writeMemory(uint16_t addr, uint8_t value);

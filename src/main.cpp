@@ -85,6 +85,8 @@ int main(int, char**) {
 
         if (!single_stepping || step) {
             cycles = gb.cpu.step();
+            gb.internal_counter += cycles;
+            gb.memory[0xFF04] = getMSB(gb.internal_counter);
         }
         
 

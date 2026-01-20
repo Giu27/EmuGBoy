@@ -6,7 +6,7 @@
 #include <gb.h>
 
 Gb::Gb() : cpu(this){
-    
+    internal_counter = 0xAB00;
 }
 
 void Gb::loadRom(std::string path) { //Reads bytes from the rom and load it in memory. For now only handles no MBCs
@@ -40,7 +40,12 @@ uint8_t Gb::readMemory(uint16_t addr) {
 
 void Gb::writeMemory(uint16_t addr, uint8_t value) {
     if (addr == 0xFF02 && value == 0x81) { //Intercepts serial output
-        std::cout<<(char)memory[0xFF01]<<std::endl;
+        std::cout<<(char)memory[0xFF01];
+        value = 0x7F;
+    }
+    if (addr == 0xFF04) {
+        value = 0x00;
+        internal_counter = 0;
     }
     if (addr >= 0xC000 && addr <= 0xDDFF) { //Echoes in echo RAM
         memory[addr + 0x2000] = value;
