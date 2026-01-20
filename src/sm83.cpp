@@ -28,9 +28,40 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             registers.ir = gb->readMemory(registers.pc);
             registers.pc++;
             switch (registers.ir) {
-            default:
-                std::cout<<"CB "<<std::hex<<(int)registers.ir<<"\n";
-                break;
+                case 0x19:{//RR C
+                    uint8_t b0 = getBit(registers.c, 0);
+                    registers.c = (registers.c >> 1) | (getFlag('c') << 7);
+                    setFlag('z', registers.c == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
+                case 0x1A:{//RR D
+                    uint8_t b0 = getBit(registers.d, 0);
+                    registers.d = (registers.d >> 1) | (getFlag('c') << 7);
+                    setFlag('z', registers.d == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
+
+                case 0x38:{//SRL B
+                    uint8_t b0 = getBit(registers.b, 0);
+                    registers.b = (registers.b >> 1) | (0 << 7);
+                    setFlag('z', registers.b == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
+                default:
+                    std::cout<<"CB "<<std::hex<<(int)registers.ir<<"\n";
+                    break;
             }
             break;
         }
@@ -204,6 +235,17 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             setFlag('n', false);
             setFlag('z', registers.e == 0);
             setFlag('h', h);
+            cycles += 4;
+            break;
+        }
+
+        case 0x1F:{//RRA
+            uint8_t b0 = getBit(registers.a, 0);
+            registers.a = (registers.a >> 1) | (getFlag('c') << 7);
+            setFlag('z', false);
+            setFlag('n', false);
+            setFlag('h', false);
+            setFlag('c', b0);
             cycles += 4;
             break;
         }
