@@ -4,7 +4,7 @@
 #include <utils.h>
 #include <sm83.h>
 #include <gb.h>
-#include <Timer.h>
+#include <timer.h>
 
 Timer::Timer(Cpu* parent) : cpu(parent) {
     sys_clock = 0xAB00;

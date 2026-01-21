@@ -1123,7 +1123,7 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             int8_t e = (int8_t) gb->readMemory(registers.pc);
             uint32_t sp = getLSB(registers.sp);
             bool h = ((sp & 0x0F) + ((uint8_t)e & 0x0F))> 0x0F;
-            bool c = ((sp & 0x0F) + ((uint8_t)e & 0x0F))> 0xFF;
+            bool c = ((sp & 0xFF) + ((uint8_t)e & 0xFF))> 0xFF;
             registers.pc++;
             registers.hl = registers.sp + e;
 
