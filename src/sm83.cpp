@@ -4,7 +4,7 @@
 #include <utils.h>
 #include <sm83.h>
 
-//FILE* log_file = fopen("cpuLog.txt", "w");
+FILE* log_file = fopen("cpuLog.txt", "w");
 
 Cpu::Cpu(Gb* parent) : gb(parent),timer(this){ //Initial Values
     registers.pc = 0x0100; 
@@ -22,8 +22,11 @@ Cpu::Cpu(Gb* parent) : gb(parent),timer(this){ //Initial Values
 }
 
 int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
-    //fprintf(log_file, "A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X\n", registers.a, registers.f, registers.b, registers.c, registers.d, registers.e, registers.h, registers.l, registers.sp, registers.pc, gb->memory[registers.pc],gb->memory[registers.pc+1],gb->memory[registers.pc+2],gb->memory[registers.pc+3]);
+    fprintf(log_file, "A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X\n", registers.a, registers.f, registers.b, registers.c, registers.d, registers.e, registers.h, registers.l, registers.sp, registers.pc, gb->memory[registers.pc],gb->memory[registers.pc+1],gb->memory[registers.pc+2],gb->memory[registers.pc+3]);
     int cycles = 0;
+
+    handleInterrupts();
+
     registers.ir = gb->readMemory(registers.pc);
     registers.pc++;
 
@@ -1167,7 +1170,14 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
         }
     }
 
-    cycles += handleInterrupts();
+    for (int i = 0; i < cycles; i++) {
+        timer.increment(); 
+
+        gb->memory[0xFF04] = getMSB(timer.sys_clock);
+        gb->memory[0xFF05] = timer.TIMA;
+        gb->memory[0xFF06] = timer.TMA;
+        gb->memory[0xFF07] = timer.TAC;
+    }
 
     return cycles;
 }
@@ -1232,6 +1242,15 @@ int Cpu::handleInterrupts() {
                 gb->writeMemory(0xFF0F, IF);
                 cycles += 20;
             }
+        }
+
+        for (int i = 0; i < cycles; i++) {
+            timer.increment(); 
+
+            gb->memory[0xFF04] = getMSB(timer.sys_clock);
+            gb->memory[0xFF05] = timer.TIMA;
+            gb->memory[0xFF06] = timer.TMA;
+            gb->memory[0xFF07] = timer.TAC;
         }
     }
     

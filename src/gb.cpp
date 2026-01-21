@@ -35,6 +35,11 @@ void Gb::loadRom(std::string path) { //Reads bytes from the rom and load it in m
 
 uint8_t Gb::readMemory(uint16_t addr) {
     if (addr == 0xFF44) return 0x90; //Temporary as well to force LY register
+
+    if (addr >= 0xFF04 && addr <= 0xFF07){
+        return cpu.timer.readRegisters(addr);
+    }
+
     if (addr == 0xFFFF) return cpu.registers.ie;
     return memory[addr]; //Temporary, will need to be replaced by a proper handling
 }
@@ -43,6 +48,11 @@ void Gb::writeMemory(uint16_t addr, uint8_t value) {
     if (addr == 0xFF02 && value == 0x81) { //Intercepts serial output
         std::cout<<(char)memory[0xFF01];
         value &= 0x7F;
+    }
+
+    if (addr >= 0xFF04 && addr <= 0xFF07){
+        cpu.timer.writeRegisters(addr, value);
+        return;
     }
 
     if (addr == 0xFFFF) { //IE Register

@@ -55,6 +55,5 @@ class Cpu {
         bool getFlag(char flag);
         void setFlag(char flag, bool val);
 
-    private: 
         Gb* gb;
 };
