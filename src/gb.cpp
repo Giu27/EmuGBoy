@@ -41,7 +41,7 @@ uint8_t Gb::readMemory(uint16_t addr) {
 void Gb::writeMemory(uint16_t addr, uint8_t value) {
     if (addr == 0xFF02 && value == 0x81) { //Intercepts serial output
         std::cout<<(char)memory[0xFF01];
-        value = 0x7F;
+        value &= 0x7F;
     }
     if (addr == 0xFF04) {
         value = 0x00;

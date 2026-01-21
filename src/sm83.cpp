@@ -4,6 +4,8 @@
 #include <utils.h>
 #include <sm83.h>
 
+//FILE* log_file = fopen("cpuLog.txt", "w");
+
 Cpu::Cpu(Gb* parent) : gb(parent){ //Initial Values
     registers.pc = 0x0100; 
     registers.sp = 0xFFFE;
@@ -19,6 +21,7 @@ Cpu::Cpu(Gb* parent) : gb(parent){ //Initial Values
 }
 
 int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
+    //fprintf(log_file, "A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X\n", registers.a, registers.f, registers.b, registers.c, registers.d, registers.e, registers.h, registers.l, registers.sp, registers.pc, gb->memory[registers.pc],gb->memory[registers.pc+1],gb->memory[registers.pc+2],gb->memory[registers.pc+3]);
     int cycles = 0;
     registers.ir = gb->readMemory(registers.pc);
     registers.pc++;
@@ -645,7 +648,7 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             uint16_t result = registers.a + registers.b;
             bool h = ((registers.a & 0x0F) + (registers.b & 0x0F))> 0x0F;
             registers.a = (uint8_t) (result & 0xFF);
-            setFlag('z', result == 0);
+            setFlag('z', registers.a == 0);
             setFlag('n', false);
             setFlag('h', h);
             setFlag('c', result > 255);
@@ -756,6 +759,16 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             setFlag('c', false);
             cycles += 4;
             break;
+
+        case 0xB8:{//CP A B
+            uint8_t result = registers.a - registers.b;
+            setFlag('z', result == 0);
+            setFlag('n', true);
+            setFlag('h', (registers.a & 0x0F) < (registers.b & 0x0F));
+            setFlag('c', registers.b > registers.a);
+            cycles += 4;
+            break;
+        }
         
         case 0xB9:{//CP A C
             uint8_t result = registers.a - registers.c;
@@ -763,6 +776,16 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             setFlag('n', true);
             setFlag('h', (registers.a & 0x0F) < (registers.c & 0x0F));
             setFlag('c', registers.c > registers.a);
+            cycles += 4;
+            break;
+        }
+
+        case 0xBA:{//CP A D
+            uint8_t result = registers.a - registers.d;
+            setFlag('z', result == 0);
+            setFlag('n', true);
+            setFlag('h', (registers.a & 0x0F) < (registers.d & 0x0F));
+            setFlag('c', registers.d > registers.a);
             cycles += 4;
             break;
         }
@@ -838,7 +861,7 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             uint16_t result = registers.a + n;
             bool h = ((registers.a & 0x0F) + (n & 0x0F))> 0x0F;
             registers.a = (uint8_t) (result & 0xFF);
-            setFlag('z', result == 0);
+            setFlag('z', registers.a == 0);
             setFlag('n', false);
             setFlag('h', h);
             setFlag('c', result > 255);
