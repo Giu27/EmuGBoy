@@ -18,6 +18,9 @@ Cpu::Cpu(Gb* parent) : gb(parent){ //Initial Values
     registers.a = 0x01;
     setFlag('z', true);
     IME = false;
+    gb->memory[0xFF0F] = 0xE1; //Initialize interrupts flags
+    gb->internal_counter = 0xAB00; //Internal 16 bit counter for timer
+    gb->memory[0xFF07] = 0xF8;
 }
 
 int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
@@ -469,6 +472,17 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             cycles += 12;
             break;
         } 
+
+        case 0x38:{//JR C e
+            int8_t e = (int8_t) gb->readMemory(registers.pc);
+            registers.pc++;
+            if (getFlag('c')) {
+                registers.pc += e;
+                cycles += 4;
+            }
+            cycles+=8;
+            break;
+        }
         
         case 0x3C:{//INC A
             bool h = (registers.a & 0x0F) == 0x0F;
@@ -656,12 +670,35 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             break;
         }
 
+        case 0x81:{//ADD A C
+            uint16_t result = registers.a + registers.c;
+            bool h = ((registers.a & 0x0F) + (registers.c & 0x0F))> 0x0F;
+            registers.a = (uint8_t) (result & 0xFF);
+            setFlag('z', registers.a == 0);
+            setFlag('n', false);
+            setFlag('h', h);
+            setFlag('c', result > 255);
+            cycles += 4;
+            break;
+        }
+
         case 0x90:{//SUB A B
             uint8_t result = registers.a - registers.b;
             setFlag('z', result == 0);
             setFlag('n', true);
             setFlag('h', (registers.a & 0x0F) < (registers.b & 0x0F));
             setFlag('c', registers.b > registers.a);
+            registers.a = result;
+            cycles += 4;
+            break;
+        }
+
+        case 0x91:{//SUB A C
+            uint8_t result = registers.a - registers.c;
+            setFlag('z', result == 0);
+            setFlag('n', true);
+            setFlag('h', (registers.a & 0x0F) < (registers.c & 0x0F));
+            setFlag('c', registers.c > registers.a);
             registers.a = result;
             cycles += 4;
             break;
@@ -883,6 +920,17 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             registers.sp += 2;
             cycles += 16;
             break;
+
+        case 0xCA:{//JP Z nn
+            uint16_t nn = bytesToWord(gb->readMemory(registers.pc), gb->readMemory(registers.pc + 1));
+            registers.pc += 2;
+            if (getFlag('z')) {
+                registers.pc = nn;
+                cycles += 4;
+            }
+            cycles += 12;
+            break;
+        }
         
         case 0xCD:{//CALL nn
             uint16_t nn = bytesToWord(gb->readMemory(registers.pc), gb->readMemory(registers.pc + 1));
@@ -902,7 +950,7 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             uint16_t result = registers.a + n + getFlag('c');
             bool h = ((registers.a & 0x0F) + (n & 0x0F) + getFlag('c'))> 0x0F;
             registers.a = (uint8_t) (result & 0xFF);
-            setFlag('z', result == 0);
+            setFlag('z', registers.a == 0);
             setFlag('n', false);
             setFlag('h', h);
             setFlag('c', result > 255);
@@ -970,6 +1018,24 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             }
             cycles += 8;
             break;
+
+        case 0xD9: //RETI
+            registers.pc = bytesToWord(gb->readMemory(registers.sp), gb->readMemory(registers.sp + 1));
+            registers.sp += 2;
+            IME = true;
+            cycles += 16;
+            break;
+
+        case 0xDA:{//JP C nn
+            uint16_t nn = bytesToWord(gb->readMemory(registers.pc), gb->readMemory(registers.pc + 1));
+            registers.pc += 2;
+            if (getFlag('c')) {
+                registers.pc = nn;
+                cycles += 4;
+            }
+            cycles += 12;
+            break;
+        }
 
         case 0xE0: //LDH [a8] A
             gb->writeMemory(bytesToWord(gb->readMemory(registers.pc), 0xFF), registers.a);
@@ -1040,6 +1106,7 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
 
         case 0xF3: //DI
             IME = false;
+            ei_delay = 0;
             cycles += 4;
             break;
         
@@ -1051,10 +1118,31 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             cycles += 16;
             break;
         
+        case 0xF8:{//LD HL, SP + e
+            int8_t e = (int8_t) gb->readMemory(registers.pc);
+            uint32_t sp = getLSB(registers.sp);
+            bool h = ((sp & 0x0F) + ((uint8_t)e & 0x0F))> 0x0F;
+            bool c = ((sp & 0x0F) + ((uint8_t)e & 0x0F))> 0xFF;
+            registers.pc++;
+            registers.hl = registers.sp + e;
+
+            setFlag('z', false);
+            setFlag('n', false);
+            setFlag('h', h);
+            setFlag('c', c);
+            cycles += 12;
+            break;
+        }
+
         case 0xFA: //LD A [a16]
             registers.a = gb->readMemory(bytesToWord(gb->readMemory(registers.pc), gb->readMemory(registers.pc + 1)));
             registers.pc += 2;
             cycles += 16;
+            break;
+        
+        case 0xFB: //EI
+            ei_delay = 2;
+            cycles += 4;
             break;
 
         case 0xFE:{//CP A n
@@ -1073,8 +1161,119 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             std::cout<<std::hex<<(int)registers.ir<<"\n";
             break;
     }
+    
+    if (ei_delay > 0) {
+        ei_delay--;
+        if (ei_delay == 0) {
+            IME = true;
+        }
+    }
+
+    cycles += handleInterrupts();
 
     return cycles;
+}
+
+int Cpu::handleInterrupts() {
+    int cycles = 0;
+    if (IME) {
+        uint8_t IF = gb->readMemory(0xFF0F);
+        if (registers.ie & IF) {
+            if (getBit(registers.ie, 0) & getBit(IF, 0)) {//V-Blank Interrupt
+                registers.sp--;
+                gb->writeMemory(registers.sp, getMSB(registers.pc));
+                registers.sp--;
+                gb->writeMemory(registers.sp, getLSB(registers.pc));
+                registers.pc = 0x40;
+                IME = false;
+                clearBit(IF, 0);
+                gb->writeMemory(0xFF0F, IF);
+                cycles += 20;
+            }
+            if (getBit(registers.ie, 1) & getBit(IF, 1)) {//LCD Interrupt
+                registers.sp--;
+                gb->writeMemory(registers.sp, getMSB(registers.pc));
+                registers.sp--;
+                gb->writeMemory(registers.sp, getLSB(registers.pc));
+                registers.pc = 0x48;
+                IME = false;
+                clearBit(IF, 1);
+                gb->writeMemory(0xFF0F, IF);
+                cycles += 20;
+            }
+            if (getBit(registers.ie, 2) & getBit(IF, 2)) {//Timer Interrupt
+                registers.sp--;
+                gb->writeMemory(registers.sp, getMSB(registers.pc));
+                registers.sp--;
+                gb->writeMemory(registers.sp, getLSB(registers.pc));
+                registers.pc = 0x50;
+                IME = false;
+                clearBit(IF, 2);
+                gb->writeMemory(0xFF0F, IF);
+                cycles += 20;
+            }
+            if (getBit(registers.ie, 3) & getBit(IF, 3)) {//Serial Interrupt
+                registers.sp--;
+                gb->writeMemory(registers.sp, getMSB(registers.pc));
+                registers.sp--;
+                gb->writeMemory(registers.sp, getLSB(registers.pc));
+                registers.pc = 0x58;
+                IME = false;
+                clearBit(IF, 3);
+                gb->writeMemory(0xFF0F, IF);
+                cycles += 20;
+            }
+            if (getBit(registers.ie, 4) & getBit(IF, 4)) {//Joypad Interrupt
+                registers.sp--;
+                gb->writeMemory(registers.sp, getMSB(registers.pc));
+                registers.sp--;
+                gb->writeMemory(registers.sp, getLSB(registers.pc));
+                registers.pc = 0x60;
+                IME = false;
+                clearBit(IF, 4);
+                gb->writeMemory(0xFF0F, IF);
+                cycles += 20;
+            }
+        }
+    }
+    
+    return cycles;
+}
+
+void Cpu::handleTimer(int cycles) {
+    uint16_t prev_counter = gb->internal_counter;
+    gb->internal_counter += cycles;
+    gb->memory[0xFF04] = getMSB(gb->internal_counter); //Updates DIV Register
+
+    uint8_t tac = gb->readMemory(0xFF07);
+    if (getBit(tac, 2)) { //Checks in TAC Register if timer is enabled
+        int bit = 0;
+        switch (tac & 0x03) { //Choose frequency
+            case 0x00: //4096
+                bit = 9;
+                break;
+            case 0x01: //262144
+                bit = 3;
+                break;
+            case 0x02: //65536
+                bit = 5;
+                break;
+            case 0x03: //16384
+                bit = 7;
+                break;
+        }
+        bool old_bit = (prev_counter >> bit) & 0x01;
+        bool new_bit = (gb->internal_counter >> bit) & 0x01;
+
+        if (old_bit && !new_bit) {
+            if (gb->memory[0xFF05] == 0xFF) {//if TIMA overflows on increment
+                gb->memory[0xFF05] = gb->memory[0xFF06]; //Reset to TMA
+                gb->writeMemory(0xFF0F, gb->readMemory(0xFF0F) | 0x04); //Interrupt
+            } else {
+                gb->memory[0xFF05]++;
+            }
+        }
+    }
 }
 
 bool Cpu::getFlag(char flag) {

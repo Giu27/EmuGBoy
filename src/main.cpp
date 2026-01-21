@@ -62,7 +62,7 @@ int main(int, char**) {
 
     //setup GB Emu
     Gb gb;
-    gb.loadRom("roms/test_roms/blargg/cpu_instrs/individual/01-special.gb");
+    gb.loadRom("roms/test_roms/blargg/cpu_instrs/individual/02-interrupts.gb");
     int cycles = 0;
     int cycles_this_frame = 0;
     int cycles_per_frame = 70224;
@@ -89,9 +89,8 @@ int main(int, char**) {
         if (!single_stepping || step) {
             while ((!single_stepping && (cycles_this_frame < cycles_per_frame)) || step) {
                 cycles = gb.cpu.step();
-                gb.internal_counter += cycles;
+                gb.cpu.handleTimer(cycles);
                 cycles_this_frame += cycles;
-                gb.memory[0xFF04] = getMSB(gb.internal_counter);
                 step = false;
             }
             

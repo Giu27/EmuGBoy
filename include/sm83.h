@@ -42,9 +42,12 @@ class Cpu {
             uint16_t& hl = HL.reg;
         } registers = {0};
         bool IME; //Interrupt Master Enable
+        int ei_delay; //EI is delayed by one instruction
     
         Cpu(Gb* parent);
         int step();
+        int handleInterrupts();
+        void handleTimer(int cycles);
         bool getFlag(char flag);
         void setFlag(char flag, bool val);
 
