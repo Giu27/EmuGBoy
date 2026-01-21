@@ -64,11 +64,14 @@ int main(int, char**) {
     Gb gb;
     gb.loadRom("roms/test_roms/blargg/cpu_instrs/individual/01-special.gb");
     int cycles = 0;
+    int cycles_this_frame = 0;
+    int cycles_per_frame = 70224;
 
     // Main loop
     bool done = false;
     while (!done){
-        
+        cycles_this_frame = 0;
+
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             ImGui_ImplSDL3_ProcessEvent(&event);
@@ -84,11 +87,15 @@ int main(int, char**) {
         }
 
         if (!single_stepping || step) {
-            cycles = gb.cpu.step();
-            gb.internal_counter += cycles;
-            gb.memory[0xFF04] = getMSB(gb.internal_counter);
+            while ((!single_stepping && (cycles_this_frame < cycles_per_frame)) || step) {
+                cycles = gb.cpu.step();
+                gb.internal_counter += cycles;
+                cycles_this_frame += cycles;
+                gb.memory[0xFF04] = getMSB(gb.internal_counter);
+                step = false;
+            }
+            
         }
-        
 
         // Start the Dear ImGui frame
         ImGui_ImplSDLRenderer3_NewFrame();

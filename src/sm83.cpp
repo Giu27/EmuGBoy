@@ -340,6 +340,26 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             registers.pc++;
             cycles += 8;
             break;
+        
+        case 0x27:{//DAA
+            uint8_t adjustment = 0;
+            if (getFlag('h') || (!getFlag('n') && (registers.a & 0x0f)> 0x09)) {
+                adjustment |= 0x06;
+            }
+            if (getFlag('c') || (!getFlag('n') && registers.a > 0x99)){
+                adjustment |= 0x60;
+                setFlag('c', true);
+            }
+            if (getFlag('n')) {
+                registers.a -= adjustment;
+            } else {
+                registers.a += adjustment;
+            }
+            setFlag('z', registers.a == 0);
+            setFlag('h', false);
+            cycles += 4;
+            break;
+        }
 
         case 0x28:{//JR Z e
             int8_t e = (int8_t) gb->readMemory(registers.pc);
@@ -767,7 +787,8 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             break;
         
         case 0xC1: //POP BC
-            registers.bc = bytesToWord(gb->readMemory(registers.sp), gb->readMemory(registers.sp + 1));
+            registers.c = gb->readMemory(registers.sp);
+            registers.b = gb->readMemory(registers.sp + 1);
             registers.sp += 2;
             cycles += 12;
             break;
@@ -797,6 +818,7 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
                 registers.sp--;
                 gb->writeMemory(registers.sp, getLSB(registers.pc));
                 registers.pc = nn;
+                cycles += 12;
             }
             cycles += 12;
             break;
@@ -875,10 +897,26 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             break;
 
         case 0xD1: //POP DE
-            registers.de = bytesToWord(gb->readMemory(registers.sp), gb->readMemory(registers.sp + 1));
+            registers.e = gb->readMemory(registers.sp);
+            registers.d = gb->readMemory(registers.sp + 1);
             registers.sp += 2;
             cycles += 12;
             break;
+        
+        case 0xD4:{//CALL NC nn
+            uint16_t nn = bytesToWord(gb->readMemory(registers.pc), gb->readMemory(registers.pc + 1));
+            registers.pc += 2;
+            if (!getFlag('c')) {
+                registers.sp--;
+                gb->writeMemory(registers.sp, getMSB(registers.pc));
+                registers.sp--;
+                gb->writeMemory(registers.sp, getLSB(registers.pc));
+                registers.pc = nn;
+                cycles += 12;
+            }
+            cycles += 12;
+            break;
+        }
 
         case 0xD5: //PUSH DE
             registers.sp--;
@@ -917,7 +955,8 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             break;
         
         case 0xE1: //POP HL
-            registers.hl = bytesToWord(gb->readMemory(registers.sp), gb->readMemory(registers.sp + 1));
+            registers.l = gb->readMemory(registers.sp);
+            registers.h = gb->readMemory(registers.sp + 1);
             registers.sp += 2;
             cycles += 12;
             break;
@@ -970,7 +1009,8 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             break;
 
         case 0xF1: //POP AF
-            registers.af = bytesToWord(gb->readMemory(registers.sp), gb->readMemory(registers.sp + 1));
+            registers.f = gb->readMemory(registers.sp) & 0xF0;
+            registers.a = gb->readMemory(registers.sp + 1);
             registers.sp += 2;
             cycles += 12;
             break;
