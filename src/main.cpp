@@ -89,7 +89,6 @@ int main(int, char**) {
         if (!single_stepping || step) {
             while ((!single_stepping && (cycles_this_frame < cycles_per_frame)) || step) {
                 cycles = gb.cpu.step();
-                gb.cpu.handleTimer(cycles);
                 cycles_this_frame += cycles;
                 step = false;
             }

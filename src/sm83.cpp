@@ -6,7 +6,7 @@
 
 //FILE* log_file = fopen("cpuLog.txt", "w");
 
-Cpu::Cpu(Gb* parent) : gb(parent){ //Initial Values
+Cpu::Cpu(Gb* parent) : gb(parent),timer(this){ //Initial Values
     registers.pc = 0x0100; 
     registers.sp = 0xFFFE;
     registers.l = 0x4D;
@@ -19,8 +19,6 @@ Cpu::Cpu(Gb* parent) : gb(parent){ //Initial Values
     setFlag('z', true);
     IME = false;
     gb->memory[0xFF0F] = 0xE1; //Initialize interrupts flags
-    gb->internal_counter = 0xAB00; //Internal 16 bit counter for timer
-    gb->memory[0xFF07] = 0xF8;
 }
 
 int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
@@ -1238,42 +1236,6 @@ int Cpu::handleInterrupts() {
     }
     
     return cycles;
-}
-
-void Cpu::handleTimer(int cycles) {
-    uint16_t prev_counter = gb->internal_counter;
-    gb->internal_counter += cycles;
-    gb->memory[0xFF04] = getMSB(gb->internal_counter); //Updates DIV Register
-
-    uint8_t tac = gb->readMemory(0xFF07);
-    if (getBit(tac, 2)) { //Checks in TAC Register if timer is enabled
-        int bit = 0;
-        switch (tac & 0x03) { //Choose frequency
-            case 0x00: //4096
-                bit = 9;
-                break;
-            case 0x01: //262144
-                bit = 3;
-                break;
-            case 0x02: //65536
-                bit = 5;
-                break;
-            case 0x03: //16384
-                bit = 7;
-                break;
-        }
-        bool old_bit = (prev_counter >> bit) & 0x01;
-        bool new_bit = (gb->internal_counter >> bit) & 0x01;
-
-        if (old_bit && !new_bit) {
-            if (gb->memory[0xFF05] == 0xFF) {//if TIMA overflows on increment
-                gb->memory[0xFF05] = gb->memory[0xFF06]; //Reset to TMA
-                gb->writeMemory(0xFF0F, gb->readMemory(0xFF0F) | 0x04); //Interrupt
-            } else {
-                gb->memory[0xFF05]++;
-            }
-        }
-    }
 }
 
 bool Cpu::getFlag(char flag) {

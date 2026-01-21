@@ -2,6 +2,7 @@
 #pragma once
 
 #include <cstdint>
+#include <timer.h>
 
 class Gb;
 
@@ -41,13 +42,16 @@ class Cpu {
             uint16_t& de = DE.reg;
             uint16_t& hl = HL.reg;
         } registers = {0};
+
+        Timer timer;
+
         bool IME; //Interrupt Master Enable
         int ei_delay; //EI is delayed by one instruction
+        int request_timer_interrupt;
     
         Cpu(Gb* parent);
         int step();
         int handleInterrupts();
-        void handleTimer(int cycles);
         bool getFlag(char flag);
         void setFlag(char flag, bool val);
 

@@ -44,15 +44,14 @@ void Gb::writeMemory(uint16_t addr, uint8_t value) {
         std::cout<<(char)memory[0xFF01];
         value &= 0x7F;
     }
-    if (addr == 0xFF04) { //Resets DIV
-        value = 0x00;
-        internal_counter = 0;
-    }
+
     if (addr == 0xFFFF) { //IE Register
         cpu.registers.ie = value;
     }
+
     if (addr >= 0xC000 && addr <= 0xDDFF) { //Echoes in echo RAM
         memory[addr + 0x2000] = value;
     }
+
     memory[addr] = value; //Temporary, will need to be replaced by a proper handling
 }
