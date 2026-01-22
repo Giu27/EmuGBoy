@@ -4,7 +4,7 @@
 #include <utils.h>
 #include <sm83.h>
 
-FILE* log_file = fopen("cpuLog.txt", "w");
+//FILE* log_file = fopen("cpuLog.txt", "w");
 
 Cpu::Cpu(Gb* parent) : gb(parent),timer(this){ //Initial Values
     registers.pc = 0x0100; 
@@ -18,17 +18,21 @@ Cpu::Cpu(Gb* parent) : gb(parent),timer(this){ //Initial Values
     registers.a = 0x01;
     setFlag('z', true);
     IME = false;
+    HALT = false;
     gb->memory[0xFF0F] = 0xE1; //Initialize interrupts flags
 }
 
 int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
-    fprintf(log_file, "A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X\n", registers.a, registers.f, registers.b, registers.c, registers.d, registers.e, registers.h, registers.l, registers.sp, registers.pc, gb->memory[registers.pc],gb->memory[registers.pc+1],gb->memory[registers.pc+2],gb->memory[registers.pc+3]);
+    //fprintf(log_file, "A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X\n", registers.a, registers.f, registers.b, registers.c, registers.d, registers.e, registers.h, registers.l, registers.sp, registers.pc, gb->memory[registers.pc],gb->memory[registers.pc+1],gb->memory[registers.pc+2],gb->memory[registers.pc+3]);
     int cycles = 0;
 
     handleInterrupts();
 
-    registers.ir = gb->readMemory(registers.pc);
-    registers.pc++;
+    if (!HALT) {
+        registers.ir = gb->readMemory(registers.pc);
+        registers.pc++;
+    }
+    
 
     switch (registers.ir) {
         case 0xCB:{//PREFIX
@@ -621,6 +625,11 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             cycles += 8;
             break;
 
+        case 0x76: //HALT
+            HALT = true;
+            cycles += 4;
+            break;
+
         case 0x77: //LD [HL] A
             gb->writeMemory(registers.hl, registers.a);
             cycles += 8;
@@ -1170,7 +1179,7 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
         }
     }
 
-    for (int i = 0; i < cycles; i++) {
+    for (int i = 0; i < cycles / 4; i++) {
         timer.increment(); 
 
         gb->memory[0xFF04] = getMSB(timer.sys_clock);
@@ -1183,9 +1192,15 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
 }
 
 int Cpu::handleInterrupts() {
+    uint8_t IF = gb->readMemory(0xFF0F);
+
+    if ((registers.ie & IF) && HALT) { //HALT handler
+        HALT = false;
+    }
+
+
     int cycles = 0;
     if (IME) {
-        uint8_t IF = gb->readMemory(0xFF0F);
         if (registers.ie & IF) {
             if (getBit(registers.ie, 0) & getBit(IF, 0)) {//V-Blank Interrupt
                 registers.sp--;
