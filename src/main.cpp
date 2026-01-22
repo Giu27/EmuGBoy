@@ -62,7 +62,7 @@ int main(int, char**) {
 
     //setup GB Emu
     Gb gb;
-    gb.loadRom("roms/test_roms/blargg/cpu_instrs/individual/08-misc instrs.gb");
+    gb.loadRom("roms/test_roms/blargg/cpu_instrs/individual/09-op r,r.gb");
     int cycles = 0;
     int cycles_this_frame = 0;
     int cycles_per_frame = 70224;

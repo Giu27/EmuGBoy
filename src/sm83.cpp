@@ -265,6 +265,17 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             cycles += 8;
             break;
 
+        case 0x17:{//RLA
+            uint8_t b7 = getBit(registers.a, 7);
+            registers.a = (registers.a << 1) | (getFlag('c'));
+            setFlag('z', false);
+            setFlag('n', false);
+            setFlag('h', false);
+            setFlag('c', b7);
+            cycles += 4;
+            break;
+        }
+
         case 0x18:{//JR e8
             int8_t e = (int8_t) gb->readMemory(registers.pc);
             registers.pc++;
@@ -517,6 +528,14 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             cycles += 12;
             break;
 
+        case 0x37:{//SCF
+            setFlag('n', 0);
+            setFlag('h', 0);
+            setFlag('c', 1);
+            cycles += 4;
+            break;
+        }
+
         case 0x38:{//JR C e
             int8_t e = (int8_t) gb->readMemory(registers.pc);
             registers.pc++;
@@ -569,6 +588,14 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             registers.pc++;
             cycles += 8;
             break;
+
+        case 0x3F:{//CCF
+            setFlag('n', 0);
+            setFlag('h', 0);
+            setFlag('c', !getFlag('c'));
+            cycles += 4;
+            break;
+        }
 
         case 0x40: //LD B r8
             registers.b = registers.b;
@@ -847,10 +874,144 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             cycles += 4;
             break;
         }
-
         case 0x81:{//ADD A C
             uint16_t result = registers.a + registers.c;
             bool h = ((registers.a & 0x0F) + (registers.c & 0x0F))> 0x0F;
+            registers.a = (uint8_t) (result & 0xFF);
+            setFlag('z', registers.a == 0);
+            setFlag('n', false);
+            setFlag('h', h);
+            setFlag('c', result > 255);
+            cycles += 4;
+            break;
+        }
+        case 0x82:{//ADD A D
+            uint16_t result = registers.a + registers.d;
+            bool h = ((registers.a & 0x0F) + (registers.d & 0x0F))> 0x0F;
+            registers.a = (uint8_t) (result & 0xFF);
+            setFlag('z', registers.a == 0);
+            setFlag('n', false);
+            setFlag('h', h);
+            setFlag('c', result > 255);
+            cycles += 4;
+            break;
+        }
+        case 0x83:{//ADD A E
+            uint16_t result = registers.a + registers.e;
+            bool h = ((registers.a & 0x0F) + (registers.e & 0x0F))> 0x0F;
+            registers.a = (uint8_t) (result & 0xFF);
+            setFlag('z', registers.a == 0);
+            setFlag('n', false);
+            setFlag('h', h);
+            setFlag('c', result > 255);
+            cycles += 4;
+            break;
+        }
+        case 0x84:{//ADD A H
+            uint16_t result = registers.a + registers.h;
+            bool h = ((registers.a & 0x0F) + (registers.h & 0x0F))> 0x0F;
+            registers.a = (uint8_t) (result & 0xFF);
+            setFlag('z', registers.a == 0);
+            setFlag('n', false);
+            setFlag('h', h);
+            setFlag('c', result > 255);
+            cycles += 4;
+            break;
+        }
+        case 0x85:{//ADD A L
+            uint16_t result = registers.a + registers.l;
+            bool h = ((registers.a & 0x0F) + (registers.l & 0x0F))> 0x0F;
+            registers.a = (uint8_t) (result & 0xFF);
+            setFlag('z', registers.a == 0);
+            setFlag('n', false);
+            setFlag('h', h);
+            setFlag('c', result > 255);
+            cycles += 4;
+            break;
+        }
+
+        case 0x87:{//ADD A A
+            uint16_t result = registers.a + registers.a;
+            bool h = ((registers.a & 0x0F) + (registers.a & 0x0F))> 0x0F;
+            registers.a = (uint8_t) (result & 0xFF);
+            setFlag('z', registers.a == 0);
+            setFlag('n', false);
+            setFlag('h', h);
+            setFlag('c', result > 255);
+            cycles += 4;
+            break;
+        }
+
+        case 0x88:{//ADC A B
+            uint16_t result = registers.a + registers.b + getFlag('c');
+            bool h = ((registers.a & 0x0F) + (registers.b & 0x0F) + getFlag('c'))> 0x0F;
+            registers.a = (uint8_t) (result & 0xFF);
+            setFlag('z', registers.a == 0);
+            setFlag('n', false);
+            setFlag('h', h);
+            setFlag('c', result > 255);
+            cycles += 4;
+            break;
+        }
+        case 0x89:{//ADC A C
+            uint16_t result = registers.a + registers.c + getFlag('c');
+            bool h = ((registers.a & 0x0F) + (registers.c & 0x0F) + getFlag('c'))> 0x0F;
+            registers.a = (uint8_t) (result & 0xFF);
+            setFlag('z', registers.a == 0);
+            setFlag('n', false);
+            setFlag('h', h);
+            setFlag('c', result > 255);
+            cycles += 4;
+            break;
+        }
+        case 0x8A:{//ADC A D
+            uint16_t result = registers.a + registers.d + getFlag('c');
+            bool h = ((registers.a & 0x0F) + (registers.d & 0x0F) + getFlag('c'))> 0x0F;
+            registers.a = (uint8_t) (result & 0xFF);
+            setFlag('z', registers.a == 0);
+            setFlag('n', false);
+            setFlag('h', h);
+            setFlag('c', result > 255);
+            cycles += 4;
+            break;
+        }
+        case 0x8B:{//ADC A E
+            uint16_t result = registers.a + registers.e + getFlag('c');
+            bool h = ((registers.a & 0x0F) + (registers.e & 0x0F) + getFlag('c'))> 0x0F;
+            registers.a = (uint8_t) (result & 0xFF);
+            setFlag('z', registers.a == 0);
+            setFlag('n', false);
+            setFlag('h', h);
+            setFlag('c', result > 255);
+            cycles += 4;
+            break;
+        }
+        case 0x8C:{//ADC A H
+            uint16_t result = registers.a + registers.h + getFlag('c');
+            bool h = ((registers.a & 0x0F) + (registers.h & 0x0F) + getFlag('c'))> 0x0F;
+            registers.a = (uint8_t) (result & 0xFF);
+            setFlag('z', registers.a == 0);
+            setFlag('n', false);
+            setFlag('h', h);
+            setFlag('c', result > 255);
+            cycles += 4;
+            break;
+        }
+        case 0x8D:{//ADC A L
+            uint16_t result = registers.a + registers.l + getFlag('c');
+            bool h = ((registers.a & 0x0F) + (registers.l & 0x0F) + getFlag('c'))> 0x0F;
+            registers.a = (uint8_t) (result & 0xFF);
+            setFlag('z', registers.a == 0);
+            setFlag('n', false);
+            setFlag('h', h);
+            setFlag('c', result > 255);
+            cycles += 4;
+            break;
+        }
+
+        case 0x8F:{//ADC A A
+            uint16_t result = registers.a + registers.a + getFlag('c');
+            bool h = ((registers.a & 0x0F) + (registers.a & 0x0F) + getFlag('c'))> 0x0F;
             registers.a = (uint8_t) (result & 0xFF);
             setFlag('z', registers.a == 0);
             setFlag('n', false);
@@ -870,7 +1031,6 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             cycles += 4;
             break;
         }
-
         case 0x91:{//SUB A C
             uint8_t result = registers.a - registers.c;
             setFlag('z', result == 0);
@@ -881,6 +1041,192 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             cycles += 4;
             break;
         }
+        case 0x92:{//SUB A D
+            uint8_t result = registers.a - registers.d;
+            setFlag('z', result == 0);
+            setFlag('n', true);
+            setFlag('h', (registers.a & 0x0F) < (registers.d & 0x0F));
+            setFlag('c', registers.d > registers.a);
+            registers.a = result;
+            cycles += 4;
+            break;
+        }
+        case 0x93:{//SUB A E
+            uint8_t result = registers.a - registers.e;
+            setFlag('z', result == 0);
+            setFlag('n', true);
+            setFlag('h', (registers.a & 0x0F) < (registers.e & 0x0F));
+            setFlag('c', registers.e > registers.a);
+            registers.a = result;
+            cycles += 4;
+            break;
+        }
+        case 0x94:{//SUB A H
+            uint8_t result = registers.a - registers.h;
+            setFlag('z', result == 0);
+            setFlag('n', true);
+            setFlag('h', (registers.a & 0x0F) < (registers.h & 0x0F));
+            setFlag('c', registers.h > registers.a);
+            registers.a = result;
+            cycles += 4;
+            break;
+        }
+        case 0x95:{//SUB A L
+            uint8_t result = registers.a - registers.l;
+            setFlag('z', result == 0);
+            setFlag('n', true);
+            setFlag('h', (registers.a & 0x0F) < (registers.l & 0x0F));
+            setFlag('c', registers.l > registers.a);
+            registers.a = result;
+            cycles += 4;
+            break;
+        }
+
+        case 0x97: //SUB A A
+            registers.a = 0;
+            setFlag('z', true);
+            setFlag('n', true);
+            setFlag('h', false);
+            setFlag('c', false);
+            cycles += 4;
+            break;
+
+        case 0x98:{//SBC A B
+            int result = registers.a - registers.b - getFlag('c');
+            bool h = ((registers.a & 0x0F) - (registers.b & 0x0F) - getFlag('c')) < 0;
+            registers.a = (uint8_t) (result & 0xFF);
+            setFlag('z', registers.a == 0);
+            setFlag('n', true);
+            setFlag('h', h);
+            setFlag('c', result < 0);
+            cycles += 4;
+            break;
+        }
+        case 0x99:{//SBC A C
+            int result = registers.a - registers.c - getFlag('c');
+            bool h = ((registers.a & 0x0F) - (registers.c & 0x0F) - getFlag('c')) < 0;
+            registers.a = (uint8_t) (result & 0xFF);
+            setFlag('z', registers.a == 0);
+            setFlag('n', true);
+            setFlag('h', h);
+            setFlag('c', result < 0);
+            cycles += 4;
+            break;
+        }
+        case 0x9A:{//SBC A D
+            int result = registers.a - registers.d - getFlag('c');
+            bool h = ((registers.a & 0x0F) - (registers.d & 0x0F) - getFlag('c')) < 0;
+            registers.a = (uint8_t) (result & 0xFF);
+            setFlag('z', registers.a == 0);
+            setFlag('n', true);
+            setFlag('h', h);
+            setFlag('c', result < 0);
+            cycles += 4;
+            break;
+        }
+        case 0x9B:{//SBC A E
+            int result = registers.a - registers.e - getFlag('c');
+            bool h = ((registers.a & 0x0F) - (registers.e & 0x0F) - getFlag('c')) < 0;
+            registers.a = (uint8_t) (result & 0xFF);
+            setFlag('z', registers.a == 0);
+            setFlag('n', true);
+            setFlag('h', h);
+            setFlag('c', result < 0);
+            cycles += 4;
+            break;
+        }
+        case 0x9C:{//SBC A H
+            int result = registers.a - registers.h - getFlag('c');
+            bool h = ((registers.a & 0x0F) - (registers.h & 0x0F) - getFlag('c')) < 0;
+            registers.a = (uint8_t) (result & 0xFF);
+            setFlag('z', registers.a == 0);
+            setFlag('n', true);
+            setFlag('h', h);
+            setFlag('c', result < 0);
+            cycles += 4;
+            break;
+        }
+        case 0x9D:{//SBC A L
+            int result = registers.a - registers.l - getFlag('c');
+            bool h = ((registers.a & 0x0F) - (registers.l & 0x0F) - getFlag('c')) < 0;
+            registers.a = (uint8_t) (result & 0xFF);
+            setFlag('z', registers.a == 0);
+            setFlag('n', true);
+            setFlag('h', h);
+            setFlag('c', result < 0);
+            cycles += 4;
+            break;
+        }
+
+        case 0x9F:{//SBC A A
+            int result = registers.a - registers.a - getFlag('c');
+            bool h = ((registers.a & 0x0F) - (registers.a & 0x0F) - getFlag('c')) < 0;
+            registers.a = (uint8_t) (result & 0xFF);
+            setFlag('z', registers.a == 0);
+            setFlag('n', true);
+            setFlag('h', h);
+            setFlag('c', result < 0);
+            cycles += 4;
+            break;
+        }
+
+        case 0xA0://AND A B
+            registers.a &= registers.b;
+            setFlag('z', registers.a == 0);
+            setFlag('n', false);
+            setFlag('h', true);
+            setFlag('c', false);
+            cycles += 4;
+            break;
+        case 0xA1://AND A C
+            registers.a &= registers.c;
+            setFlag('z', registers.a == 0);
+            setFlag('n', false);
+            setFlag('h', true);
+            setFlag('c', false);
+            cycles += 4;
+            break;
+        case 0xA2://AND A D
+            registers.a &= registers.d;
+            setFlag('z', registers.a == 0);
+            setFlag('n', false);
+            setFlag('h', true);
+            setFlag('c', false);
+            cycles += 4;
+            break;
+        case 0xA3://AND A E
+            registers.a &= registers.e;
+            setFlag('z', registers.a == 0);
+            setFlag('n', false);
+            setFlag('h', true);
+            setFlag('c', false);
+            cycles += 4;
+            break;
+        case 0xA4://AND A H
+            registers.a &= registers.h;
+            setFlag('z', registers.a == 0);
+            setFlag('n', false);
+            setFlag('h', true);
+            setFlag('c', false);
+            cycles += 4;
+            break;
+        case 0xA5://AND A L
+            registers.a &= registers.l;
+            setFlag('z', registers.a == 0);
+            setFlag('n', false);
+            setFlag('h', true);
+            setFlag('c', false);
+            cycles += 4;
+            break;
+
+        case 0xA7://AND A A
+            registers.a &= registers.a;
+            setFlag('z', registers.a == 0);
+            setFlag('n', false);
+            setFlag('h', true);
+            setFlag('c', false);
+            cycles += 4;
+            break;
 
         case 0xA8: //XOR A r8
             registers.a ^= registers.b;
@@ -1023,8 +1369,7 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             setFlag('c', registers.b > registers.a);
             cycles += 4;
             break;
-        }
-        
+        }       
         case 0xB9:{//CP A C
             uint8_t result = registers.a - registers.c;
             setFlag('z', result == 0);
@@ -1034,7 +1379,6 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             cycles += 4;
             break;
         }
-
         case 0xBA:{//CP A D
             uint8_t result = registers.a - registers.d;
             setFlag('z', result == 0);
@@ -1044,7 +1388,6 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             cycles += 4;
             break;
         }
-
         case 0xBB:{//CP A E
             uint8_t result = registers.a - registers.e;
             setFlag('z', result == 0);
@@ -1054,6 +1397,32 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             cycles += 4;
             break;
         }
+        case 0xBC:{//CP A H
+            uint8_t result = registers.a - registers.h;
+            setFlag('z', result == 0);
+            setFlag('n', true);
+            setFlag('h', (registers.a & 0x0F) < (registers.h & 0x0F));
+            setFlag('c', registers.h > registers.a);
+            cycles += 4;
+            break;
+        }
+        case 0xBD:{//CP A L
+            uint8_t result = registers.a - registers.l;
+            setFlag('z', result == 0);
+            setFlag('n', true);
+            setFlag('h', (registers.a & 0x0F) < (registers.l & 0x0F));
+            setFlag('c', registers.l > registers.a);
+            cycles += 4;
+            break;
+        }
+
+        case 0xBF: //CP A A
+            setFlag('z', true);
+            setFlag('n', true);
+            setFlag('h', false);
+            setFlag('c', false);
+            cycles += 4;
+            break;
         
         case 0xC0: //RET NZ
             if (!getFlag('z')) {
