@@ -39,6 +39,232 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             registers.ir = gb->readMemory(registers.pc);
             registers.pc++;
             switch (registers.ir) {
+                case 0x00: {//RLC B
+                    uint8_t b7 = getBit(registers.b, 7);
+                    registers.b = (registers.b << 1) | b7;
+                    setFlag('z', registers.b == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b7);
+                    cycles += 8;
+                    break;
+                }
+                case 0x01: {//RLC C
+                    uint8_t b7 = getBit(registers.c, 7);
+                    registers.c = (registers.c << 1) | b7;
+                    setFlag('z', registers.c == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b7);
+                    cycles += 8;
+                    break;
+                }
+                case 0x02: {//RLC D
+                    uint8_t b7 = getBit(registers.d, 7);
+                    registers.d = (registers.d << 1) | b7;
+                    setFlag('z', registers.d == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b7);
+                    cycles += 8;
+                    break;
+                }
+                case 0x03: {//RLC E
+                    uint8_t b7 = getBit(registers.e, 7);
+                    registers.e = (registers.e << 1) | b7;
+                    setFlag('z', registers.e == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b7);
+                    cycles += 8;
+                    break;
+                }
+                case 0x04: {//RLC H
+                    uint8_t b7 = getBit(registers.h, 7);
+                    registers.h = (registers.h << 1) | b7;
+                    setFlag('z', registers.h == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b7);
+                    cycles += 8;
+                    break;
+                }
+                case 0x05: {//RLC L
+                    uint8_t b7 = getBit(registers.l, 7);
+                    registers.l = (registers.l << 1) | b7;
+                    setFlag('z', registers.l == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b7);
+                    cycles += 8;
+                    break;
+                }
+
+                case 0x07: {//RLC A
+                    uint8_t b7 = getBit(registers.a, 7);
+                    registers.a = (registers.a << 1) | b7;
+                    setFlag('z', registers.a == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b7);
+                    cycles += 8;
+                    break;
+                }
+
+                case 0x08:{//RRC B
+                    uint8_t b0 = getBit(registers.b, 0);
+                    registers.b = (registers.b >> 1) | (b0 << 7);
+                    setFlag('z', registers.b == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
+                case 0x09:{//RRC C
+                    uint8_t b0 = getBit(registers.c, 0);
+                    registers.c = (registers.c >> 1) | (b0 << 7);
+                    setFlag('z', registers.c == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
+                case 0x0A:{//RRC D
+                    uint8_t b0 = getBit(registers.d, 0);
+                    registers.d = (registers.d >> 1) | (b0 << 7);
+                    setFlag('z', registers.d == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
+                case 0x0B:{//RRC E
+                    uint8_t b0 = getBit(registers.e, 0);
+                    registers.e = (registers.e >> 1) | (b0 << 7);
+                    setFlag('z', registers.e == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
+                case 0x0C:{//RRC H
+                    uint8_t b0 = getBit(registers.h, 0);
+                    registers.h = (registers.h >> 1) | (b0 << 7);
+                    setFlag('z', registers.h == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
+                case 0x0D:{//RRC L
+                    uint8_t b0 = getBit(registers.l, 0);
+                    registers.l = (registers.l >> 1) | (b0 << 7);
+                    setFlag('z', registers.l == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
+
+                case 0x0F:{//RRC A
+                    uint8_t b0 = getBit(registers.a, 0);
+                    registers.a = (registers.a >> 1) | (b0 << 7);
+                    setFlag('z', registers.a == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
+
+                case 0x10:{//RL B
+                    uint8_t b7 = getBit(registers.b, 7);
+                    registers.b = (registers.b << 1) | (getFlag('c'));
+                    setFlag('z', registers.b == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b7);
+                    cycles += 8;
+                    break;
+                }
+                case 0x11:{//RL C
+                    uint8_t b7 = getBit(registers.c, 7);
+                    registers.c = (registers.c << 1) | (getFlag('c'));
+                    setFlag('z', registers.c == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b7);
+                    cycles += 8;
+                    break;
+                }
+                case 0x12:{//RL D
+                    uint8_t b7 = getBit(registers.d, 7);
+                    registers.d = (registers.d << 1) | (getFlag('c'));
+                    setFlag('z', registers.d == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b7);
+                    cycles += 8;
+                    break;
+                }
+                case 0x13:{//RL E
+                    uint8_t b7 = getBit(registers.e, 7);
+                    registers.e = (registers.e << 1) | (getFlag('c'));
+                    setFlag('z', registers.e == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b7);
+                    cycles += 8;
+                    break;
+                }
+                case 0x14:{//RL H
+                    uint8_t b7 = getBit(registers.h, 7);
+                    registers.h = (registers.h << 1) | (getFlag('c'));
+                    setFlag('z', registers.h == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b7);
+                    cycles += 8;
+                    break;
+                }
+                case 0x15:{//RL L
+                    uint8_t b7 = getBit(registers.l, 7);
+                    registers.l = (registers.l << 1) | (getFlag('c'));
+                    setFlag('z', registers.l == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b7);
+                    cycles += 8;
+                    break;
+                }
+
+                case 0x17:{//RL A
+                    uint8_t b7 = getBit(registers.a, 7);
+                    registers.a = (registers.a << 1) | (getFlag('c'));
+                    setFlag('z', registers.a == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b7);
+                    cycles += 8;
+                    break;
+                }
+
+                case 0x18:{//RR B
+                    uint8_t b0 = getBit(registers.b, 0);
+                    registers.b = (registers.b >> 1) | (getFlag('c') << 7);
+                    setFlag('z', registers.b == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
                 case 0x19:{//RR C
                     uint8_t b0 = getBit(registers.c, 0);
                     registers.c = (registers.c >> 1) | (getFlag('c') << 7);
@@ -69,6 +295,255 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
                     cycles += 8;
                     break;
                 }
+                case 0x1C:{//RR H
+                    uint8_t b0 = getBit(registers.h, 0);
+                    registers.h = (registers.h >> 1) | (getFlag('c') << 7);
+                    setFlag('z', registers.h == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
+                case 0x1D:{//RR L
+                    uint8_t b0 = getBit(registers.l, 0);
+                    registers.l = (registers.l >> 1) | (getFlag('c') << 7);
+                    setFlag('z', registers.l == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
+
+                case 0x1F:{//RR A
+                    uint8_t b0 = getBit(registers.a, 0);
+                    registers.a = (registers.a >> 1) | (getFlag('c') << 7);
+                    setFlag('z', registers.a == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
+
+                case 0x20:{//SLA B
+                    uint8_t b7 = getBit(registers.b, 7);
+                    registers.b = (registers.b << 1);
+                    setFlag('z', registers.b == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b7);
+                    cycles += 8;
+                    break;
+                }
+                case 0x21:{//SLA C
+                    uint8_t b7 = getBit(registers.bc, 7);
+                    registers.c = (registers.c << 1);
+                    setFlag('z', registers.c == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b7);
+                    cycles += 8;
+                    break;
+                }
+                case 0x22:{//SLA D
+                    uint8_t b7 = getBit(registers.d, 7);
+                    registers.d = (registers.d << 1);
+                    setFlag('z', registers.d == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b7);
+                    cycles += 8;
+                    break;
+                }
+                case 0x23:{//SLA E
+                    uint8_t b7 = getBit(registers.e, 7);
+                    registers.e = (registers.e << 1);
+                    setFlag('z', registers.e == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b7);
+                    cycles += 8;
+                    break;
+                }
+                case 0x24:{//SLA H
+                    uint8_t b7 = getBit(registers.h, 7);
+                    registers.h = (registers.h << 1);
+                    setFlag('z', registers.h == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b7);
+                    cycles += 8;
+                    break;
+                }
+                case 0x25:{//SLA L
+                    uint8_t b7 = getBit(registers.l, 7);
+                    registers.l = (registers.l << 1);
+                    setFlag('z', registers.l == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b7);
+                    cycles += 8;
+                    break;
+                }
+
+                case 0x27:{//SLA A
+                    uint8_t b7 = getBit(registers.a, 7);
+                    registers.a = (registers.a << 1);
+                    setFlag('z', registers.a == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b7);
+                    cycles += 8;
+                    break;
+                }
+
+                case 0x28:{//SRA B
+                    uint8_t b0 = getBit(registers.b, 0);
+                    uint8_t b7 = getBit(registers.b, 7);
+                    registers.b = (registers.b >> 1) | b7 << 7;
+                    setFlag('z', registers.b == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
+                case 0x29:{//SRA C
+                    uint8_t b0 = getBit(registers.c, 0);
+                    uint8_t b7 = getBit(registers.c, 7);
+                    registers.c = (registers.c >> 1) | b7 << 7;
+                    setFlag('z', registers.c == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
+                case 0x2A:{//SRA D
+                    uint8_t b0 = getBit(registers.d, 0);
+                    uint8_t b7 = getBit(registers.d, 7);
+                    registers.d = (registers.d >> 1) | b7 << 7;
+                    setFlag('z', registers.d == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
+                case 0x2B:{//SRA E
+                    uint8_t b0 = getBit(registers.e, 0);
+                    uint8_t b7 = getBit(registers.e, 7);
+                    registers.e = (registers.e >> 1) | b7 << 7;
+                    setFlag('z', registers.e == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
+                case 0x2C:{//SRA H
+                    uint8_t b0 = getBit(registers.h, 0);
+                    uint8_t b7 = getBit(registers.h, 7);
+                    registers.h = (registers.h >> 1) | b7 << 7;
+                    setFlag('z', registers.h == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
+                case 0x2D:{//SRA L
+                    uint8_t b0 = getBit(registers.l, 0);
+                    uint8_t b7 = getBit(registers.l, 7);
+                    registers.l = (registers.l >> 1) | b7 << 7;
+                    setFlag('z', registers.l == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
+
+                case 0x2F:{//SRA A
+                    uint8_t b0 = getBit(registers.a, 0);
+                    uint8_t b7 = getBit(registers.a, 7);
+                    registers.a = (registers.a >> 1) | b7 << 7;
+                    setFlag('z', registers.a == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
+
+                case 0x30:{//SWAP B
+                    uint8_t msb = registers.b & 0xF0;
+                    uint8_t lsb = registers.b & 0x0F;
+                    registers.b = (lsb << 4) | (msb >> 4);
+                    setFlag('z', registers.b == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', false);
+                    cycles += 8;
+                    break;
+                }
+                case 0x31:{//SWAP C
+                    uint8_t msb = registers.c & 0xF0;
+                    uint8_t lsb = registers.c & 0x0F;
+                    registers.c = (lsb << 4) | (msb >> 4);
+                    setFlag('z', registers.c == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', false);
+                    cycles += 8;
+                    break;
+                }
+                case 0x32:{//SWAP D
+                    uint8_t msb = registers.d & 0xF0;
+                    uint8_t lsb = registers.d & 0x0F;
+                    registers.d = (lsb << 4) | (msb >> 4);
+                    setFlag('z', registers.d == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', false);
+                    cycles += 8;
+                    break;
+                }
+                case 0x33:{//SWAP E
+                    uint8_t msb = registers.e & 0xF0;
+                    uint8_t lsb = registers.e & 0x0F;
+                    registers.e = (lsb << 4) | (msb >> 4);
+                    setFlag('z', registers.e == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', false);
+                    cycles += 8;
+                    break;
+                }
+                case 0x34:{//SWAP H
+                    uint8_t msb = registers.h & 0xF0;
+                    uint8_t lsb = registers.h & 0x0F;
+                    registers.h = (lsb << 4) | (msb >> 4);
+                    setFlag('z', registers.h == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', false);
+                    cycles += 8;
+                    break;
+                }
+                case 0x35:{//SWAP L
+                    uint8_t msb = registers.l & 0xF0;
+                    uint8_t lsb = registers.l & 0x0F;
+                    registers.l = (lsb << 4) | (msb >> 4);
+                    setFlag('z', registers.l == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', false);
+                    cycles += 8;
+                    break;
+                }
 
                 case 0x37:{//SWAP A
                     uint8_t msb = registers.a & 0xF0;
@@ -92,6 +567,68 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
                     cycles += 8;
                     break;
                 }
+                case 0x39:{//SRL C
+                    uint8_t b0 = getBit(registers.c, 0);
+                    registers.c = (registers.c >> 1) | (0 << 7);
+                    setFlag('z', registers.c == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
+                case 0x3A:{//SRL D
+                    uint8_t b0 = getBit(registers.d, 0);
+                    registers.d = (registers.d >> 1) | (0 << 7);
+                    setFlag('z', registers.d == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
+                case 0x3B:{//SRL E
+                    uint8_t b0 = getBit(registers.e, 0);
+                    registers.e = (registers.e >> 1) | (0 << 7);
+                    setFlag('z', registers.e == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
+                case 0x3C:{//SRL H
+                    uint8_t b0 = getBit(registers.h, 0);
+                    registers.h = (registers.h >> 1) | (0 << 7);
+                    setFlag('z', registers.h == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
+                case 0x3D:{//SRL L
+                    uint8_t b0 = getBit(registers.l, 0);
+                    registers.l = (registers.l >> 1) | (0 << 7);
+                    setFlag('z', registers.l == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
+
+                case 0x3F:{//SRL A
+                    uint8_t b0 = getBit(registers.a, 0);
+                    registers.a = (registers.a >> 1) | (0 << 7);
+                    setFlag('z', registers.a == 0);
+                    setFlag('n', false);
+                    setFlag('h', false);
+                    setFlag('c', b0);
+                    cycles += 8;
+                    break;
+                }
+
                 default:
                     std::cout<<"CB "<<std::hex<<(int)registers.ir<<"\n";
                     break;
