@@ -629,6 +629,836 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
                     break;
                 }
 
+                case 0x40: //BIT 0 r
+                    setFlag('z', !getBit(registers.b, 0));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x41: 
+                    setFlag('z', !getBit(registers.c, 0));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x42: 
+                    setFlag('z', !getBit(registers.d, 0));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x43: 
+                    setFlag('z', !getBit(registers.e, 0));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x44: 
+                    setFlag('z', !getBit(registers.h, 0));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x45: 
+                    setFlag('z', !getBit(registers.l, 0));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+
+                case 0x47:
+                    setFlag('z', !getBit(registers.a, 0));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+
+                case 0x48: //BIT 1 r
+                    setFlag('z', !getBit(registers.b, 1));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x49: 
+                    setFlag('z', !getBit(registers.c, 1));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x4A: 
+                    setFlag('z', !getBit(registers.d, 1));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x4B: 
+                    setFlag('z', !getBit(registers.e, 1));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x4C: 
+                    setFlag('z', !getBit(registers.h, 1));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x4D: 
+                    setFlag('z', !getBit(registers.l, 1));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+
+                case 0x4F:
+                    setFlag('z', !getBit(registers.a, 1));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+
+                case 0x50: //BIT 2 r
+                    setFlag('z', !getBit(registers.b, 2));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x51: 
+                    setFlag('z', !getBit(registers.c, 2));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x52: 
+                    setFlag('z', !getBit(registers.d, 2));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x53: 
+                    setFlag('z', !getBit(registers.e, 2));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x54: 
+                    setFlag('z', !getBit(registers.h, 2));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x55: 
+                    setFlag('z', !getBit(registers.l, 2));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+
+                case 0x57:
+                    setFlag('z', !getBit(registers.a, 2));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+
+                case 0x58: //BIT 3 r
+                    setFlag('z', !getBit(registers.b, 3));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x59: 
+                    setFlag('z', !getBit(registers.c, 3));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x5A: 
+                    setFlag('z', !getBit(registers.d, 3));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x5B: 
+                    setFlag('z', !getBit(registers.e, 3));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x5C: 
+                    setFlag('z', !getBit(registers.h, 3));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x5D: 
+                    setFlag('z', !getBit(registers.l, 3));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+
+                case 0x5F:
+                    setFlag('z', !getBit(registers.a, 3));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+
+                case 0x60: //BIT 4 r
+                    setFlag('z', !getBit(registers.b, 4));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x61: 
+                    setFlag('z', !getBit(registers.c, 4));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x62: 
+                    setFlag('z', !getBit(registers.d, 4));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x63: 
+                    setFlag('z', !getBit(registers.e, 4));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x64: 
+                    setFlag('z', !getBit(registers.h, 4));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x65: 
+                    setFlag('z', !getBit(registers.l, 4));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+
+                case 0x67:
+                    setFlag('z', !getBit(registers.a, 4));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+
+                case 0x68: //BIT 5 r
+                    setFlag('z', !getBit(registers.b, 5));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x69: 
+                    setFlag('z', !getBit(registers.c, 5));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x6A: 
+                    setFlag('z', !getBit(registers.d, 5));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x6B: 
+                    setFlag('z', !getBit(registers.e, 5));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x6C: 
+                    setFlag('z', !getBit(registers.h, 5));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x6D: 
+                    setFlag('z', !getBit(registers.l, 5));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+
+                case 0x6F:
+                    setFlag('z', !getBit(registers.a, 5));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+
+                case 0x70: //BIT 6 r
+                    setFlag('z', !getBit(registers.b, 6));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x71: 
+                    setFlag('z', !getBit(registers.c, 6));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x72: 
+                    setFlag('z', !getBit(registers.d, 6));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x73: 
+                    setFlag('z', !getBit(registers.e, 6));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x74: 
+                    setFlag('z', !getBit(registers.h, 6));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x75: 
+                    setFlag('z', !getBit(registers.l, 6));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+
+                case 0x77:
+                    setFlag('z', !getBit(registers.a, 6));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+
+                case 0x78: //BIT 7 r
+                    setFlag('z', !getBit(registers.b, 7));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x79: 
+                    setFlag('z', !getBit(registers.c, 7));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x7A: 
+                    setFlag('z', !getBit(registers.d, 7));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x7B: 
+                    setFlag('z', !getBit(registers.e, 7));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x7C: 
+                    setFlag('z', !getBit(registers.h, 7));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+                case 0x7D: 
+                    setFlag('z', !getBit(registers.l, 7));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+
+                case 0x7F:
+                    setFlag('z', !getBit(registers.a, 7));
+                    setFlag('n', false);
+                    setFlag('h', true);
+                    cycles += 8;
+                    break;
+
+                case 0x80: //RES 0 r
+                    clearBit(registers.b, 0);
+                    cycles += 8;
+                    break;
+                case 0x81: 
+                    clearBit(registers.c, 0);
+                    cycles += 8;
+                    break;
+                case 0x82: 
+                    clearBit(registers.d, 0);
+                    cycles += 8;
+                    break;
+                case 0x83: 
+                    clearBit(registers.e, 0);
+                    cycles += 8;
+                    break;
+                case 0x84: 
+                    clearBit(registers.h, 0);
+                    cycles += 8;
+                    break;
+                case 0x85: 
+                    clearBit(registers.l, 0);
+                    cycles += 8;
+                    break;
+
+                case 0x87:
+                    clearBit(registers.a, 0);
+                    cycles += 8;
+                    break;
+
+                case 0x88: //RES 1 r
+                    clearBit(registers.b, 1);
+                    cycles += 8;
+                    break;
+                case 0x89: 
+                    clearBit(registers.c, 1);
+                    cycles += 8;
+                    break;
+                case 0x8A: 
+                    clearBit(registers.d, 1);
+                    cycles += 8;
+                    break;
+                case 0x8B: 
+                    clearBit(registers.e, 1);
+                    cycles += 8;
+                    break;
+                case 0x8C: 
+                    clearBit(registers.h, 1);
+                    cycles += 8;
+                    break;
+                case 0x8D: 
+                    clearBit(registers.l, 1);
+                    cycles += 8;
+                    break;
+
+                case 0x8F:
+                    clearBit(registers.a, 1);
+                    cycles += 8;
+                    break;
+
+                case 0x90: //RES 2 r
+                    clearBit(registers.b, 2);
+                    cycles += 8;
+                    break;
+                case 0x91: 
+                    clearBit(registers.c, 2);
+                    cycles += 8;
+                    break;
+                case 0x92: 
+                    clearBit(registers.d, 2);
+                    cycles += 8;
+                    break;
+                case 0x93: 
+                    clearBit(registers.e, 2);
+                    cycles += 8;
+                    break;
+                case 0x94: 
+                    clearBit(registers.h, 2);
+                    cycles += 8;
+                    break;
+                case 0x95: 
+                    clearBit(registers.l, 2);
+                    cycles += 8;
+                    break;
+
+                case 0x97:
+                    clearBit(registers.a, 2);
+                    cycles += 8;
+                    break;
+
+                case 0x98: //RES 3 r
+                    clearBit(registers.b, 3);
+                    cycles += 8;
+                    break;
+                case 0x99: 
+                    clearBit(registers.c, 3);
+                    cycles += 8;
+                    break;
+                case 0x9A: 
+                    clearBit(registers.d, 3);
+                    cycles += 8;
+                    break;
+                case 0x9B: 
+                    clearBit(registers.e, 3);
+                    cycles += 8;
+                    break;
+                case 0x9C: 
+                    clearBit(registers.h, 3);
+                    cycles += 8;
+                    break;
+                case 0x9D: 
+                    clearBit(registers.l, 3);
+                    cycles += 8;
+                    break;
+
+                case 0x9F:
+                    clearBit(registers.a, 3);
+                    cycles += 8;
+                    break;
+
+                case 0xA0: //RES 4 r
+                    clearBit(registers.b, 4);
+                    cycles += 8;
+                    break;
+                case 0xA1: 
+                    clearBit(registers.c, 4);
+                    cycles += 8;
+                    break;
+                case 0xA2: 
+                    clearBit(registers.d, 4);
+                    cycles += 8;
+                    break;
+                case 0xA3: 
+                    clearBit(registers.e, 4);
+                    cycles += 8;
+                    break;
+                case 0xA4: 
+                    clearBit(registers.h, 4);
+                    cycles += 8;
+                    break;
+                case 0xA5: 
+                    clearBit(registers.l, 4);
+                    cycles += 8;
+                    break;
+
+                case 0xA7:
+                    clearBit(registers.a, 4);
+                    cycles += 8;
+                    break;
+
+                case 0xA8: //RES 5 r
+                    clearBit(registers.b, 5);
+                    cycles += 8;
+                    break;
+                case 0xA9: 
+                    clearBit(registers.c, 5);
+                    cycles += 8;
+                    break;
+                case 0xAA: 
+                    clearBit(registers.d, 5);
+                    cycles += 8;
+                    break;
+                case 0xAB: 
+                    clearBit(registers.e, 5);
+                    cycles += 8;
+                    break;
+                case 0xAC: 
+                    clearBit(registers.h, 5);
+                    cycles += 8;
+                    break;
+                case 0xAD: 
+                    clearBit(registers.l, 5);
+                    cycles += 8;
+                    break;
+
+                case 0xAF:
+                    clearBit(registers.a, 5);
+                    cycles += 8;
+                    break;
+
+                case 0xB0: //RES 6 r
+                    clearBit(registers.b, 6);
+                    cycles += 8;
+                    break;
+                case 0xB1: 
+                    clearBit(registers.c, 6);
+                    cycles += 8;
+                    break;
+                case 0xB2: 
+                    clearBit(registers.d, 6);
+                    cycles += 8;
+                    break;
+                case 0xB3: 
+                    clearBit(registers.e, 6);
+                    cycles += 8;
+                    break;
+                case 0xB4: 
+                    clearBit(registers.h, 6);
+                    break;
+                case 0xB5: 
+                    clearBit(registers.l, 6);
+                    cycles += 8;
+                    break;
+
+                case 0xB7:
+                    clearBit(registers.a, 6);
+                    cycles += 8;
+                    break;
+                    
+                case 0xB8: //RES 7 r
+                    clearBit(registers.b, 7);
+                    cycles += 8;
+                    break;
+                case 0xB9: 
+                    clearBit(registers.c, 7);
+                    cycles += 8;
+                    break;
+                case 0xBA: 
+                    clearBit(registers.d, 7);
+                    cycles += 8;
+                    break;
+                case 0xBB: 
+                    clearBit(registers.e, 7);
+                    cycles += 8;
+                    break;
+                case 0xBC: 
+                    clearBit(registers.h, 7);
+                    cycles += 8;
+                    break;
+                case 0xBD: 
+                    clearBit(registers.l, 7);
+                    cycles += 8;
+                    break;
+
+                case 0xBF:
+                    clearBit(registers.a, 7);
+                    cycles += 8;
+                    break;
+
+                case 0xC0: //SET 0 r
+                    setBit(registers.b, 0);
+                    cycles += 8;
+                    break;
+                case 0xC1: 
+                    setBit(registers.c, 0);
+                    cycles += 8;
+                    break;
+                case 0xC2: 
+                    setBit(registers.d, 0);
+                    cycles += 8;
+                    break;
+                case 0xC3: 
+                    setBit(registers.e, 0);
+                    cycles += 8;
+                    break;
+                case 0xC4: 
+                    setBit(registers.h, 0);
+                    cycles += 8;
+                    break;
+                case 0xC5: 
+                    setBit(registers.l, 0);
+                    cycles += 8;
+                    break;
+
+                case 0xC7:
+                    setBit(registers.a, 0);
+                    cycles += 8;
+                    break;
+
+                case 0xC8: //SET 1 r
+                    setBit(registers.b, 1);
+                    cycles += 8;
+                    break;
+                case 0xC9: 
+                    setBit(registers.c, 1);
+                    cycles += 8;
+                    break;
+                case 0xCA: 
+                    setBit(registers.d, 1);
+                    cycles += 8;
+                    break;
+                case 0xCB: 
+                    setBit(registers.e, 1);
+                    cycles += 8;
+                    break;
+                case 0xCC: 
+                    setBit(registers.h, 1);
+                    cycles += 8;
+                    break;
+                case 0xCD: 
+                    setBit(registers.l, 1);
+                    cycles += 8;
+                    break;
+
+                case 0xCF:
+                    setBit(registers.a, 1);
+                    cycles += 8;
+                    break;
+
+                case 0xD0: //SET 2 r
+                    setBit(registers.b, 2);
+                    cycles += 8;
+                    break;
+                case 0xD1: 
+                    setBit(registers.c, 2);
+                    cycles += 8;
+                    break;
+                case 0xD2: 
+                    setBit(registers.d, 2);
+                    cycles += 8;
+                    break;
+                case 0xD3: 
+                    setBit(registers.e, 2);
+                    cycles += 8;
+                    break;
+                case 0xD4: 
+                    setBit(registers.h, 2);
+                    cycles += 8;
+                    break;
+                case 0xD5: 
+                    setBit(registers.l, 2);
+                    cycles += 8;
+                    break;
+
+                case 0xD7:
+                    setBit(registers.a, 2);
+                    cycles += 8;
+                    break;
+
+                case 0xD8: //SET 3 r
+                    setBit(registers.b, 3);
+                    cycles += 8;
+                    break;
+                case 0xD9: 
+                    setBit(registers.c, 3);
+                    cycles += 8;
+                    break;
+                case 0xDA: 
+                    setBit(registers.d, 3);
+                    cycles += 8;
+                    break;
+                case 0xDB: 
+                    setBit(registers.e, 3);
+                    cycles += 8;
+                    break;
+                case 0xDC: 
+                    setBit(registers.h, 3);
+                    cycles += 8;
+                    break;
+                case 0xDD: 
+                    setBit(registers.l, 3);
+                    cycles += 8;
+                    break;
+
+                case 0xDF:
+                    setBit(registers.a, 3);
+                    cycles += 8;
+                    break;
+
+                case 0xE0: //SET 4 r
+                    setBit(registers.b, 4);
+                    cycles += 8;
+                    break;
+                case 0xE1: 
+                    setBit(registers.c, 4);
+                    cycles += 8;
+                    break;
+                case 0xE2: 
+                    setBit(registers.d, 4);
+                    cycles += 8;
+                    break;
+                case 0xE3: 
+                    setBit(registers.e, 4);
+                    cycles += 8;
+                    break;
+                case 0xE4: 
+                    setBit(registers.h, 4);
+                    cycles += 8;
+                    break;
+                case 0xE5: 
+                    setBit(registers.l, 4);
+                    cycles += 8;
+                    break;
+
+                case 0xE7:
+                    setBit(registers.a, 4);
+                    cycles += 8;
+                    break;
+
+                case 0xE8: //SET 5 r
+                    setBit(registers.b, 5);
+                    cycles += 8;
+                    break;
+                case 0xE9: 
+                    setBit(registers.c, 5);
+                    cycles += 8;
+                    break;
+                case 0xEA: 
+                    setBit(registers.d, 5);
+                    cycles += 8;
+                    break;
+                case 0xEB: 
+                    setBit(registers.e, 5);
+                    cycles += 8;
+                    break;
+                case 0xEC: 
+                    setBit(registers.h, 5);
+                    cycles += 8;
+                    break;
+                case 0xED: 
+                    setBit(registers.l, 5);
+                    cycles += 8;
+                    break;
+
+                case 0xEF:
+                    setBit(registers.a, 5);                    
+                    cycles += 8;
+                    break;
+
+                case 0xF0: //SET 6 r
+                    setBit(registers.b, 6);                    
+                    cycles += 8;
+                    break;
+                case 0xF1: 
+                    setBit(registers.c, 6);                    
+                    cycles += 8;
+                    break;
+                case 0xF2: 
+                    setBit(registers.d, 6);
+                    cycles += 8;
+                    break;
+                case 0xF3: 
+                    setBit(registers.e, 6);  
+                    cycles += 8;
+                    break;
+                case 0xF4: 
+                    setBit(registers.h, 6);
+                    cycles += 8;
+                    break;
+                case 0xF5: 
+                    setBit(registers.l, 6);
+                    cycles += 8;
+                    break;
+                    
+                case 0xF7:
+                    setBit(registers.a, 6);
+                    cycles += 8;
+                    break;
+                case 0xF8: //SET 7 r
+                    setBit(registers.b, 7);
+                    cycles += 8;
+                    break;
+                case 0xF9: 
+                    setBit(registers.c, 7);
+                    cycles += 8;
+                    break;
+                case 0xFA: 
+                    setBit(registers.d, 7);
+                    cycles += 8;
+                    break;
+                case 0xFB: 
+                    setBit(registers.e, 7);
+                    cycles += 8;
+                    break;
+                case 0xFC: 
+                    setBit(registers.h, 7);
+                    cycles += 8;
+                    break;
+                case 0xFD: 
+                    setBit(registers.l, 7);
+                    cycles += 8;
+                    break;
+
+                case 0xFF:
+                    setBit(registers.a, 7);
+                    cycles += 8;
+                    break;
+
                 default:
                     std::cout<<"CB "<<std::hex<<(int)registers.ir<<"\n";
                     break;
