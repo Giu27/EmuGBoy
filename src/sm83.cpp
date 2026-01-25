@@ -1389,6 +1389,7 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
                     break;
                 case 0xB4: 
                     clearBit(registers.h, 6);
+                    cycles += 8;
                     break;
                 case 0xB5: 
                     clearBit(registers.l, 6);
