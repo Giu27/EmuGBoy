@@ -34,7 +34,7 @@ void Gb::loadRom(std::string path) { //Reads bytes from the rom and load it in m
 }
 
 uint8_t Gb::readMemory(uint16_t addr) {
-    if (addr == 0xFF44) return 0x90; //Temporary as well to force LY register
+    //if (addr == 0xFF44) return 0x90; //Stub LY register, useful for test roms
 
     if (addr >= 0xFF04 && addr <= 0xFF07){
         return cpu.timer.readRegisters(addr);

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <sm83.h>
+#include <ppu.h>
 
 #define MEMORY_SIZE 0x10000
 
@@ -24,6 +25,7 @@ FFFF to FFFF: IE Register
 class Gb {
     public:
         Cpu cpu;
+        Ppu ppu;
         uint8_t memory [MEMORY_SIZE] = {0};
 
         uint16_t internal_counter;
