@@ -1168,6 +1168,14 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
                     cycles += 8;
                     break;
 
+                case 0x86:{//RES 0 [HL]
+                    uint8_t data = gb->readMemory(registers.hl);
+                    clearBit(data, 0);
+                    gb->writeMemory(registers.hl, data);
+                    cycles += 16;
+                    break;
+                }
+
                 case 0x87:
                     clearBit(registers.a, 0);
                     cycles += 8;
@@ -1197,6 +1205,14 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
                     clearBit(registers.l, 1);
                     cycles += 8;
                     break;
+
+                case 0x8E:{//RES 1 [HL]
+                    uint8_t data = gb->readMemory(registers.hl);
+                    clearBit(data, 1);
+                    gb->writeMemory(registers.hl, data);
+                    cycles += 16;
+                    break;
+                }
 
                 case 0x8F:
                     clearBit(registers.a, 1);
@@ -1228,6 +1244,14 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
                     cycles += 8;
                     break;
 
+                case 0x96:{//RES 2 [HL]
+                    uint8_t data = gb->readMemory(registers.hl);
+                    clearBit(data, 2);
+                    gb->writeMemory(registers.hl, data);
+                    cycles += 16;
+                    break;
+                }
+
                 case 0x97:
                     clearBit(registers.a, 2);
                     cycles += 8;
@@ -1257,6 +1281,14 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
                     clearBit(registers.l, 3);
                     cycles += 8;
                     break;
+
+                case 0x9E:{//RES 3 [HL]
+                    uint8_t data = gb->readMemory(registers.hl);
+                    clearBit(data, 3);
+                    gb->writeMemory(registers.hl, data);
+                    cycles += 16;
+                    break;
+                }
 
                 case 0x9F:
                     clearBit(registers.a, 3);
@@ -1288,6 +1320,14 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
                     cycles += 8;
                     break;
 
+                case 0xA6:{//RES 4 [HL]
+                    uint8_t data = gb->readMemory(registers.hl);
+                    clearBit(data, 4);
+                    gb->writeMemory(registers.hl, data);
+                    cycles += 16;
+                    break;
+                }
+
                 case 0xA7:
                     clearBit(registers.a, 4);
                     cycles += 8;
@@ -1318,6 +1358,14 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
                     cycles += 8;
                     break;
 
+                case 0xAE:{//RES 5 [HL]
+                    uint8_t data = gb->readMemory(registers.hl);
+                    clearBit(data, 5);
+                    gb->writeMemory(registers.hl, data);
+                    cycles += 16;
+                    break;
+                }
+
                 case 0xAF:
                     clearBit(registers.a, 5);
                     cycles += 8;
@@ -1346,6 +1394,14 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
                     clearBit(registers.l, 6);
                     cycles += 8;
                     break;
+
+                case 0xB6:{//RES 6 [HL]
+                    uint8_t data = gb->readMemory(registers.hl);
+                    clearBit(data, 6);
+                    gb->writeMemory(registers.hl, data);
+                    cycles += 16;
+                    break;
+                }
 
                 case 0xB7:
                     clearBit(registers.a, 6);
@@ -1377,6 +1433,14 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
                     cycles += 8;
                     break;
 
+                case 0xBE:{//RES 7 [HL]
+                    uint8_t data = gb->readMemory(registers.hl);
+                    clearBit(data, 7);
+                    gb->writeMemory(registers.hl, data);
+                    cycles += 16;
+                    break;
+                }
+
                 case 0xBF:
                     clearBit(registers.a, 7);
                     cycles += 8;
@@ -1406,6 +1470,14 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
                     setBit(registers.l, 0);
                     cycles += 8;
                     break;
+
+                case 0xC6:{//SET 0 [HL]
+                    uint8_t data = gb->readMemory(registers.hl);
+                    setBit(data, 0);
+                    gb->writeMemory(registers.hl, data);
+                    cycles += 16;
+                    break;
+                }
 
                 case 0xC7:
                     setBit(registers.a, 0);
@@ -1437,6 +1509,14 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
                     cycles += 8;
                     break;
 
+                case 0xCE:{//SET 1 [HL]
+                    uint8_t data = gb->readMemory(registers.hl);
+                    setBit(data, 1);
+                    gb->writeMemory(registers.hl, data);
+                    cycles += 16;
+                    break;
+                }
+
                 case 0xCF:
                     setBit(registers.a, 1);
                     cycles += 8;
@@ -1466,6 +1546,14 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
                     setBit(registers.l, 2);
                     cycles += 8;
                     break;
+
+                case 0xD6:{//SET 2 [HL]
+                    uint8_t data = gb->readMemory(registers.hl);
+                    setBit(data, 2);
+                    gb->writeMemory(registers.hl, data);
+                    cycles += 16;
+                    break;
+                }
 
                 case 0xD7:
                     setBit(registers.a, 2);
@@ -1497,6 +1585,14 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
                     cycles += 8;
                     break;
 
+                case 0xDE:{//SET 3 [HL]
+                    uint8_t data = gb->readMemory(registers.hl);
+                    setBit(data, 3);
+                    gb->writeMemory(registers.hl, data);
+                    cycles += 16;
+                    break;
+                }
+
                 case 0xDF:
                     setBit(registers.a, 3);
                     cycles += 8;
@@ -1526,6 +1622,14 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
                     setBit(registers.l, 4);
                     cycles += 8;
                     break;
+
+                case 0xE6:{//SET 4 [HL]
+                    uint8_t data = gb->readMemory(registers.hl);
+                    setBit(data, 4);
+                    gb->writeMemory(registers.hl, data);
+                    cycles += 16;
+                    break;
+                }
 
                 case 0xE7:
                     setBit(registers.a, 4);
@@ -1557,6 +1661,14 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
                     cycles += 8;
                     break;
 
+                case 0xEE:{//SET 5 [HL]
+                    uint8_t data = gb->readMemory(registers.hl);
+                    setBit(data, 5);
+                    gb->writeMemory(registers.hl, data);
+                    cycles += 16;
+                    break;
+                }
+
                 case 0xEF:
                     setBit(registers.a, 5);                    
                     cycles += 8;
@@ -1586,11 +1698,20 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
                     setBit(registers.l, 6);
                     cycles += 8;
                     break;
+
+                case 0xF6:{//SET 6 [HL]
+                    uint8_t data = gb->readMemory(registers.hl);
+                    setBit(data, 6);
+                    gb->writeMemory(registers.hl, data);
+                    cycles += 16;
+                    break;
+                }
                     
                 case 0xF7:
                     setBit(registers.a, 6);
                     cycles += 8;
                     break;
+                
                 case 0xF8: //SET 7 r
                     setBit(registers.b, 7);
                     cycles += 8;
@@ -1615,6 +1736,14 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
                     setBit(registers.l, 7);
                     cycles += 8;
                     break;
+
+                case 0xFE:{//SET 7 [HL]
+                    uint8_t data = gb->readMemory(registers.hl);
+                    setBit(data, 7);
+                    gb->writeMemory(registers.hl, data);
+                    cycles += 16;
+                    break;
+                }
 
                 case 0xFF:
                     setBit(registers.a, 7);
