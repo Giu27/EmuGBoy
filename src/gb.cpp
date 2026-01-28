@@ -5,7 +5,7 @@
 #include <utils.h>
 #include <gb.h>
 
-Gb::Gb() : cpu(this){
+Gb::Gb() : cpu(this), ppu(){
     
 }
 

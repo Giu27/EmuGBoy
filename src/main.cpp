@@ -53,6 +53,11 @@ int main(int, char**) {
     ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer3_Init(renderer);
 
+    //Setup screen
+    SDL_Texture* screen = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 160, 144);
+    SDL_SetTextureScaleMode(screen, SDL_SCALEMODE_NEAREST);
+    int scale = 3; //Integer scale for the resolution
+
     // Initial windows state
     bool show_registers = true;
     bool show_memory = false;
@@ -124,8 +129,10 @@ int main(int, char**) {
         }
 
         {
-            ImGui::Begin("Video output:");
-            //TODO: Actually do something
+            ImGui::SetNextWindowSize(ImVec2(160 * scale, 144 * scale));
+            ImGui::Begin("Video output:", NULL, ImGuiWindowFlags_NoResize);
+            ImVec2 region = ImGui::GetContentRegionAvail();
+            ImGui::Image(screen, region);
             ImGui::End();
         }
 
