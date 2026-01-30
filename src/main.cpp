@@ -94,6 +94,7 @@ int main(int, char**) {
         if (!single_stepping || step) {
             while ((!single_stepping && (cycles_this_frame < cycles_per_frame)) || step) {
                 cycles = gb.cpu.step();
+                gb.ppu.tick(cycles);
                 cycles_this_frame += cycles;
                 step = false;
             }
@@ -107,7 +108,7 @@ int main(int, char**) {
 
         // Show a simple window that we create ourselves. We use a Begin/End pair to create a named window. Always at (0, 0)
         ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-        {
+        { //Settings window
             ImGui::Begin("EmuGBoy", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize);
 
             //TODO: Move rom selector here
@@ -128,7 +129,7 @@ int main(int, char**) {
             ImGui::End();
         }
 
-        {
+        { //Video output
             ImGui::SetNextWindowSize(ImVec2(160 * scale, 144 * scale));
             ImGui::Begin("Video output:", NULL, ImGuiWindowFlags_NoResize);
             ImVec2 region = ImGui::GetContentRegionAvail();
