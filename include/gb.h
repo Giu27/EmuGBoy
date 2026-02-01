@@ -27,10 +27,13 @@ class Gb {
         Cpu cpu;
         Ppu ppu;
         uint8_t memory [MEMORY_SIZE] = {0};
+        uint8_t boot_rom [0xFF] = {0};
 
         uint16_t internal_counter;
+        bool boot_rom_mapped = true;
 
         void loadRom(std::string path);
+        void loadBootRom(std::string path);
         uint8_t readMemory(uint16_t addr);
         void writeMemory(uint16_t addr, uint8_t value);
 

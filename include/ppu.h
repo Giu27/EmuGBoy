@@ -14,7 +14,8 @@ enum Mode {
 
 class Ppu {
     public:
-        uint8_t palette[4];
+        uint32_t palette[4] = {0xE0F8D0FF, 0x88C070FF, 0x346856FF, 0x081820FF};
+        uint32_t frame_buffer[160 * 144];
 
         uint8_t LCDC; //FF40
         uint8_t STAT; //FF41
@@ -28,6 +29,8 @@ class Ppu {
         Ppu(Gb* parent);
         void loadBackGround(uint8_t row);
         void tick(int cycles);
+        uint8_t readMemory(uint16_t addr);
+        void writeMemory(uint16_t addr, uint8_t value);
 
         Gb* gb;
 };

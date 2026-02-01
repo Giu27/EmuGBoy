@@ -67,6 +67,7 @@ int main(int, char**) {
 
     //setup GB Emu
     Gb gb;
+    gb.loadBootRom("roms/bootrom.bin");
     gb.loadRom("roms/Tetris.gb");
     int cycles = 0;
     int cycles_this_frame = 0;
@@ -128,6 +129,8 @@ int main(int, char**) {
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
             ImGui::End();
         }
+
+        SDL_UpdateTexture(screen, NULL, gb.ppu.frame_buffer, 160 * 4);
 
         { //Video output
             ImGui::SetNextWindowSize(ImVec2(160 * scale, 144 * scale));

@@ -9,6 +9,28 @@ Gb::Gb() : cpu(this), ppu(this){
     
 }
 
+void Gb::loadBootRom(std::string path) { //Reads bytes from the bootrom and load it
+    std::ifstream file(path, std::ios::in | std::ios::binary | std::ios::ate);
+    if (!file){
+        std::cerr<< "Error loading the Boot ROM!";
+        boot_rom_mapped = false;
+        return ;
+    }
+
+    cpu.registers.pc = 0;
+
+    std::streamsize size = file.tellg();
+    std::vector<char> buffer(size);
+
+    file.seekg(0, std::ios::beg);
+    file.read(reinterpret_cast<char*>(buffer.data()), size);
+	file.close();
+
+    for (unsigned int i = 0; i < size; i++) {
+		boot_rom[i] = buffer[i];
+	}
+}
+
 void Gb::loadRom(std::string path) { //Reads bytes from the rom and load it in memory. For now only handles no MBCs
     std::ifstream file(path, std::ios::in | std::ios::binary | std::ios::ate);
     if (!file){
@@ -35,6 +57,13 @@ void Gb::loadRom(std::string path) { //Reads bytes from the rom and load it in m
 
 uint8_t Gb::readMemory(uint16_t addr) {
     //if (addr == 0xFF44) return 0x90; //Stub LY register, useful for test roms
+    if (addr <= 0xFF && boot_rom_mapped) {
+        return boot_rom[addr];
+    }
+
+    if (addr >= 0xFF40 && addr <= 0xFF41 || addr == 0xFF44) {
+        return ppu.readMemory(addr);
+    }
 
     if (addr >= 0xFF04 && addr <= 0xFF07){
         return cpu.timer.readRegisters(addr);
@@ -48,6 +77,15 @@ void Gb::writeMemory(uint16_t addr, uint8_t value) {
     if (addr == 0xFF02 && value == 0x81) { //Intercepts serial output
         std::cout<<(char)memory[0xFF01];
         value &= 0x7F;
+    }
+
+    if (addr == 0xFF50) {
+        boot_rom_mapped = false;
+    }
+
+    if (addr >= 0xFF40 && addr <= 0xFF41 || addr == 0xFF44) {
+        ppu.writeMemory(addr, value);
+        return;
     }
 
     if (addr >= 0xFF04 && addr <= 0xFF07){
