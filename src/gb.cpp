@@ -6,7 +6,7 @@
 #include <gb.h>
 
 Gb::Gb() : cpu(this), ppu(this){
-    
+
 }
 
 void Gb::loadBootRom(std::string path) { //Reads bytes from the bootrom and load it
@@ -55,8 +55,61 @@ void Gb::loadRom(std::string path) { //Reads bytes from the rom and load it in m
     }
 }
 
+void Gb::updateJoypad() {
+    //0: A, 1: B, 2: select; 3: start, 4: UP, 5: DOWN, 6: LEFT, 7: RIGHT
+    memory[0xFF00] = memory[0xFF00] | 0x0F;
+    if (!getBit(memory[0xFF00], 5)) {
+        if (keystate[0]) {
+            clearBit(memory[0xFF00], 0);
+            setBit(memory[0xFF0F], 4); //THIS IS CLEARLY WRONG: I NEED TO SLEEP
+        }
+        if (keystate[1]) {
+            clearBit(memory[0xFF00], 1);
+            setBit(memory[0xFF0F], 4);
+        }
+        if (keystate[2]) {
+            clearBit(memory[0xFF00], 2);
+            setBit(memory[0xFF0F], 4);
+        }
+        if (keystate[3]) {
+            clearBit(memory[0xFF00], 3);
+            setBit(memory[0xFF0F], 4);
+        }
+        if (!keystate[0]) setBit(memory[0xFF00], 0);
+        if (!keystate[1]) setBit(memory[0xFF00], 1);
+        if (!keystate[2]) setBit(memory[0xFF00], 2);
+        if (!keystate[3]) setBit(memory[0xFF00], 3);
+    }
+    if (!getBit(memory[0xFF00], 4)) {
+        if (keystate[7]) {
+            clearBit(memory[0xFF00], 0);
+            setBit(memory[0xFF0F], 4);
+        }
+        if (keystate[6]) {
+            clearBit(memory[0xFF00], 1);
+            setBit(memory[0xFF0F], 4);
+        }
+        if (keystate[5]) {
+            clearBit(memory[0xFF00], 2);
+            setBit(memory[0xFF0F], 4);
+        }
+        if (keystate[4]) {
+            clearBit(memory[0xFF00], 3);
+            setBit(memory[0xFF0F], 4);
+        }
+        if (!keystate[7]) setBit(memory[0xFF00], 0);
+        if (!keystate[6]) setBit(memory[0xFF00], 1);
+        if (!keystate[4]) setBit(memory[0xFF00], 2);
+        if (!keystate[5]) setBit(memory[0xFF00], 3);
+    }
+}
+
 uint8_t Gb::readMemory(uint16_t addr) {
     //if (addr == 0xFF44) return 0x90; //Stub LY register, useful for test roms
+    if (addr == 0xFF00) {
+        updateJoypad();
+    }
+    
     if (addr <= 0xFF && boot_rom_mapped) {
         return boot_rom[addr];
     }
@@ -74,6 +127,12 @@ uint8_t Gb::readMemory(uint16_t addr) {
 }
 
 void Gb::writeMemory(uint16_t addr, uint8_t value) {
+    if (addr == 0xFF00) {
+        memory[addr] = (memory[addr] & 0xCF) | (value & 0x30);
+        updateJoypad();
+        return;
+    }
+
     if (addr == 0xFF02 && value == 0x81) { //Intercepts serial output
         std::cout<<(char)memory[0xFF01];
         value &= 0x7F;

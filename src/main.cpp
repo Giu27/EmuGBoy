@@ -10,6 +10,8 @@
 
 static MemoryEditor mem_edit;
 
+int getKey(SDL_Scancode scancode);
+
 // Main code
 int main(int, char**) {
     // Setup SDL
@@ -81,10 +83,22 @@ int main(int, char**) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             ImGui_ImplSDL3_ProcessEvent(&event);
-            if (event.type == SDL_EVENT_QUIT)
-                done = true;
-            if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(window))
-                done = true;
+            switch (event.type) {
+                case SDL_EVENT_QUIT:
+                    done = true;
+                    break;
+                case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+                    if (event.window.windowID == SDL_GetWindowID(window)) {
+                        done = true;
+                    }
+                    break;
+                case SDL_EVENT_KEY_DOWN:
+                    gb.keystate[getKey(event.key.scancode)] = true;
+                    break;
+                case SDL_EVENT_KEY_UP:
+                    gb.keystate[getKey(event.key.scancode)] = false;
+                    break;
+            }
         }
 
         if (SDL_GetWindowFlags(window) & SDL_WINDOW_MINIMIZED) {
@@ -214,4 +228,34 @@ int main(int, char**) {
     SDL_Quit();
 
     return 0;
+}
+
+int getKey(SDL_Scancode scancode) {
+    switch (scancode) {
+        case SDL_SCANCODE_X:
+            return 0;
+            break;
+        case SDL_SCANCODE_Z:
+            return 1;
+            break;
+        case SDL_SCANCODE_C:
+            return 2;
+            break;
+        case SDL_SCANCODE_V:
+            return 3;
+            break;
+        case SDL_SCANCODE_UP:
+            return 4;
+            break;
+        case SDL_SCANCODE_DOWN:
+            return 5;
+            break;
+        case SDL_SCANCODE_LEFT:
+            return 6;
+            break;
+        case SDL_SCANCODE_RIGHT:
+            return 7;
+            break;
+    }
+    return -1;
 }

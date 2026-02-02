@@ -9,3 +9,4 @@ For now the project is not endian independent and the rom to be loaded is hardco
 ## Reference
 
 * [Pan Docs](https://gbdev.io/pandocs/)
+* [EmuDev](https://emudev.de/)
