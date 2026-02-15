@@ -46,6 +46,7 @@ class Cpu {
         Timer timer;
 
         bool HALT;
+        bool HALT_BUG;
         bool IME; //Interrupt Master Enable
         int ei_delay; //EI is delayed by one instruction
         int request_timer_interrupt;

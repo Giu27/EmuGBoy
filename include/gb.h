@@ -29,7 +29,7 @@ class Gb {
         uint8_t memory [MEMORY_SIZE] = {0};
         uint8_t boot_rom [0xFF] = {0};
 
-        bool keystate[8] = {0};
+        bool keystate[9] = {0};
         bool boot_rom_mapped = true;
 
         void loadRom(std::string path);

@@ -19,6 +19,7 @@ Cpu::Cpu(Gb* parent) : gb(parent),timer(this){ //Initial Values
     setFlag('z', true);
     IME = false;
     HALT = false;
+    HALT_BUG = false;
     gb->memory[0xFF0F] = 0xE1; //Initialize interrupts flags
 }
 
@@ -26,11 +27,12 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
     //fprintf(log_file, "A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X\n", registers.a, registers.f, registers.b, registers.c, registers.d, registers.e, registers.h, registers.l, registers.sp, registers.pc, gb->memory[registers.pc],gb->memory[registers.pc+1],gb->memory[registers.pc+2],gb->memory[registers.pc+3]);
     int cycles = 0;
 
-    handleInterrupts();
+    int interrupt_cycles = handleInterrupts();
 
     if (!HALT) {
         registers.ir = gb->readMemory(registers.pc);
-        registers.pc++;
+        if(!HALT_BUG) registers.pc++;
+        else HALT_BUG = false;
     }
     
 
@@ -2499,6 +2501,10 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
 
         case 0x76: //HALT
             HALT = true;
+            if (IME == 0 && (registers.ie & gb->readMemory(0xFF0F) & 0x1F)) {
+                HALT_BUG = true;
+                HALT = false;
+            }
             cycles += 4;
             break;
 
@@ -3679,21 +3685,20 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
         gb->memory[0xFF07] = timer.TAC;
     }
 
-    return cycles;
+    return cycles + interrupt_cycles;
 }
 
 int Cpu::handleInterrupts() {
     uint8_t IF = gb->readMemory(0xFF0F);
 
-    if ((registers.ie & IF) && HALT) { //HALT handler
+    if ((registers.ie & IF & 0x1F) && HALT) { //HALT handler
         HALT = false;
     }
 
-
     int cycles = 0;
     if (IME) {
-        if (registers.ie & IF) {
-            if (getBit(registers.ie, 0) & getBit(IF, 0)) {//V-Blank Interrupt
+        if (registers.ie & IF & 0x1F) {
+            if ((getBit(registers.ie, 0) & getBit(IF, 0)) && IME) {//V-Blank Interrupt
                 registers.sp--;
                 gb->writeMemory(registers.sp, getMSB(registers.pc));
                 registers.sp--;
@@ -3704,7 +3709,7 @@ int Cpu::handleInterrupts() {
                 gb->writeMemory(0xFF0F, IF);
                 cycles += 20;
             }
-            if (getBit(registers.ie, 1) & getBit(IF, 1)) {//LCD Interrupt
+            if ((getBit(registers.ie, 1) & getBit(IF, 1)) && IME) {//LCD Interrupt
                 registers.sp--;
                 gb->writeMemory(registers.sp, getMSB(registers.pc));
                 registers.sp--;
@@ -3715,7 +3720,7 @@ int Cpu::handleInterrupts() {
                 gb->writeMemory(0xFF0F, IF);
                 cycles += 20;
             }
-            if (getBit(registers.ie, 2) & getBit(IF, 2)) {//Timer Interrupt
+            if ((getBit(registers.ie, 2) & getBit(IF, 2)) && IME) {//Timer Interrupt
                 registers.sp--;
                 gb->writeMemory(registers.sp, getMSB(registers.pc));
                 registers.sp--;
@@ -3726,7 +3731,7 @@ int Cpu::handleInterrupts() {
                 gb->writeMemory(0xFF0F, IF);
                 cycles += 20;
             }
-            if (getBit(registers.ie, 3) & getBit(IF, 3)) {//Serial Interrupt
+            if ((getBit(registers.ie, 3) & getBit(IF, 3)) && IME) {//Serial Interrupt
                 registers.sp--;
                 gb->writeMemory(registers.sp, getMSB(registers.pc));
                 registers.sp--;
@@ -3737,7 +3742,7 @@ int Cpu::handleInterrupts() {
                 gb->writeMemory(0xFF0F, IF);
                 cycles += 20;
             }
-            if (getBit(registers.ie, 4) & getBit(IF, 4)) {//Joypad Interrupt
+            if ((getBit(registers.ie, 4) & getBit(IF, 4)) && IME) {//Joypad Interrupt
                 registers.sp--;
                 gb->writeMemory(registers.sp, getMSB(registers.pc));
                 registers.sp--;

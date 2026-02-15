@@ -122,6 +122,10 @@ uint8_t Gb::readMemory(uint16_t addr) {
         return cpu.timer.readRegisters(addr);
     }
 
+    if (addr == 0xFF0F){
+        return memory[addr] | 0xE0;
+    }
+
     if (addr == 0xFFFF) return cpu.registers.ie;
     return memory[addr]; //Temporary, will need to be replaced by a proper handling
 }
