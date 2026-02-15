@@ -70,7 +70,7 @@ int main(int, char**) {
     //setup GB Emu
     Gb gb;
     gb.loadBootRom("roms/bootrom.bin");
-    gb.loadRom("roms/test_roms/blargg/halt_bug.gb");
+    gb.loadRom("roms/Tetris.gb");
     int cycles = 0;
     int cycles_this_frame = 0;
     int cycles_per_frame = 70224;

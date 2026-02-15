@@ -8,9 +8,10 @@ Ppu::Ppu(Gb* parent) : gb(parent) {
     LCDC = 0x91;
     STAT = 0x85;
     current_mode = MODE2_OAM;
+    dots = 0;
 }
 
-void Ppu::loadBackGround(uint8_t row) {
+void Ppu::loadBackGround() {
     uint16_t base_pointer = getBit(LCDC, 4) ? 0x8000 : 0x9000;
     uint16_t tile_map = getBit(LCDC, 3) ? 0x9C00 : 0x9800;
     uint16_t addr;
@@ -20,7 +21,7 @@ void Ppu::loadBackGround(uint8_t row) {
     SCX = gb->readMemory(0xFF43);
 
     uint8_t pal = gb->readMemory(0xFF47); //BGP
-    uint8_t offY = row + SCY;
+    uint8_t offY = LY + SCY;
     for (int i = 0; i < 160; i++) {
         uint8_t offX = i + SCX;
 
@@ -35,41 +36,90 @@ void Ppu::loadBackGround(uint8_t row) {
         }
 
         uint32_t colorfrompal = (pal >> (2 * colour)) & 3;
-        frame_buffer[row * 160 + i] = palette[colorfrompal];
+        frame_buffer[LY * 160 + i] = palette[colorfrompal];
+    }
+}
+
+void Ppu::checkLYC() {
+    uint8_t LYC = gb->readMemory(0xFF45);
+    if (LY == LYC) {
+        setBit(STAT, 2);
+        gb->writeMemory(0xFF41, STAT);
+        if (getBit(STAT, 6)) {
+            setBit(gb->memory[0xFF0F], 1);
+        }
+    } else {
+        clearBit(STAT, 2);
+        gb->writeMemory(0xFF41, STAT);
+    }
+}
+
+void Ppu::checkSTAT() {
+    STAT |= current_mode;
+    gb->writeMemory(0xFF41, STAT);
+    bool interrupt = false;
+    if (current_mode == MODE0_HBLANK && getBit(STAT, 3)){
+        interrupt = true;
+    }
+    if (current_mode == MODE1_VBLANK && getBit(STAT, 4)){
+        interrupt = true;
+    }
+    if (current_mode == MODE2_OAM && getBit(STAT, 5)){
+        interrupt = true;
+    }
+    if (interrupt) {
+        setBit(gb->memory[0xFF0F], 1);
     }
 }
 
 void Ppu::tick(int cycles) {
     dots += cycles;
     
-    switch(current_mode) {
+    switch(current_mode) { //TODO Properly handle mode 0 and mode 3 duration
         case MODE0_HBLANK:
-            LY++;
-            gb->memory[0xFF44] = LY;
-            if (LY == 144) {
-                current_mode = MODE1_VBLANK;
-                setBit(gb->memory[0xFF0F], 0);
-            } else {
-                current_mode = MODE2_OAM;
-            }     
+            if (dots >= 204) {
+                LY++;
+                gb->memory[0xFF44] = LY;
+                checkLYC();
+                if (LY == 144) {
+                    current_mode = MODE1_VBLANK;
+                    setBit(gb->memory[0xFF0F], 0);
+                } else {
+                    current_mode = MODE2_OAM; 
+                }
+                checkSTAT();   
+                dots -= 204;  
+            }
             break;
 
         case MODE1_VBLANK:
-            LY++;
-            if (LY == 154) {
-                current_mode = MODE2_OAM;
-                LY = 0;
+            if (dots >= 456) {
+                dots -= 456;
+                LY++;
+                if (LY == 154) {
+                    current_mode = MODE2_OAM;
+                    checkSTAT();
+                    LY = 0;
+                }
+                gb->memory[0xFF44] = LY;
+                checkLYC();
             }
-            gb->memory[0xFF44] = LY;
             break;
 
         case MODE2_OAM:
-            current_mode = MODE3_DRAW;
+            if (dots >= 80){
+                current_mode = MODE3_DRAW;
+                dots -= 80;
+            }        
             break;
 
         case MODE3_DRAW:
-            loadBackGround(LY);
-            current_mode = MODE0_HBLANK;
+            loadBackGround();
+            if (dots >= 172) {
+               current_mode = MODE0_HBLANK; 
+               checkSTAT();
+               dots -= 172;
+            }
             break;
     }
 }

@@ -3709,7 +3709,7 @@ int Cpu::handleInterrupts() {
                 gb->writeMemory(0xFF0F, IF);
                 cycles += 20;
             }
-            if ((getBit(registers.ie, 1) & getBit(IF, 1)) && IME) {//LCD Interrupt
+            if ((getBit(registers.ie, 1) & getBit(IF, 1)) && IME) {//LCD/STAT Interrupt
                 registers.sp--;
                 gb->writeMemory(registers.sp, getMSB(registers.pc));
                 registers.sp--;

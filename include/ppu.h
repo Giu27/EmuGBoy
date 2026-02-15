@@ -27,10 +27,12 @@ class Ppu {
         Mode current_mode;
 
         Ppu(Gb* parent);
-        void loadBackGround(uint8_t row);
+        void loadBackGround();
         void tick(int cycles);
         uint8_t readMemory(uint16_t addr);
         void writeMemory(uint16_t addr, uint8_t value);
+        void checkSTAT();
+        void checkLYC();
 
         Gb* gb;
 };
