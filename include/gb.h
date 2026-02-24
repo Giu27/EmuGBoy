@@ -31,6 +31,10 @@ class Gb {
 
         bool keystate[9] = {0};
         bool boot_rom_mapped = true;
+        bool DMATR = false;
+        uint8_t dma_source;
+        int dma_t_clocks;
+        int dma_byte_index;
 
         void loadRom(std::string path);
         void loadBootRom(std::string path);

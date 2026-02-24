@@ -105,6 +105,13 @@ void Gb::updateJoypad() {
 }
 
 uint8_t Gb::readMemory(uint16_t addr) {
+    if (DMATR) {
+        if (addr >= 0xFF80 && addr <= 0xFFFE) {
+            return memory[addr]; 
+        } else {
+            return 0xFF;
+        }
+    }
     //if (addr == 0xFF44) return 0x90; //Stub LY register, useful for test roms
     if (addr == 0xFF00) {
         updateJoypad();
@@ -127,7 +134,7 @@ uint8_t Gb::readMemory(uint16_t addr) {
     }
 
     if (addr == 0xFFFF) return cpu.registers.ie;
-    return memory[addr]; //Temporary, will need to be replaced by a proper handling
+    return memory[addr]; 
 }
 
 void Gb::writeMemory(uint16_t addr, uint8_t value) {
@@ -162,6 +169,11 @@ void Gb::writeMemory(uint16_t addr, uint8_t value) {
 
     if (addr >= 0xC000 && addr <= 0xDDFF) { //Echoes in echo RAM
         memory[addr + 0x2000] = value;
+    }
+
+    if (addr == 0xFF46) { //DMA transfer
+        DMATR= true;
+        dma_source = value;
     }
 
     memory[addr] = value; //Temporary, will need to be replaced by a proper handling

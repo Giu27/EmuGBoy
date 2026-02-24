@@ -3685,6 +3685,21 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
         gb->memory[0xFF07] = timer.TAC;
     }
 
+    if (gb->DMATR) {
+        gb->dma_t_clocks += cycles;
+        while (gb->dma_t_clocks >= 4 && gb->dma_byte_index < 160) {
+            uint16_t src = (gb->dma_source << 8) | gb->dma_byte_index;
+            gb->memory[0xFE00 + gb->dma_byte_index] = gb->memory[src];
+            gb->dma_byte_index++;
+            gb->dma_t_clocks -= 4;
+        }
+        if (gb->dma_byte_index >= 160) {
+            gb->DMATR = false;
+            gb->dma_byte_index = 0;
+            gb->dma_t_clocks = 0;
+        }
+    }
+
     return cycles + interrupt_cycles;
 }
 
