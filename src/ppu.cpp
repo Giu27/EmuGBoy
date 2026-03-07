@@ -9,12 +9,15 @@ Ppu::Ppu(Gb* parent) : gb(parent) {
     STAT = 0x85;
     current_mode = MODE2_OAM;
     dots = 0;
+    WLY = 0;
 }
 
 void Ppu::loadBackGround() {
-    bool window = getBit(LCDC, 5); //Checks if the window is enabled
+    bool window = getBit(LCDC, 5) && (LY >= WY); //Checks if the window is enabled and on line
     uint16_t base_pointer = getBit(LCDC, 4) ? 0x8000 : 0x9000;
-    uint16_t tile_map = getBit(LCDC, 3) ? 0x9C00 : 0x9800;
+    uint16_t background_map = getBit(LCDC, 3) ? 0x9C00 : 0x9800;
+    uint16_t window_map = getBit(LCDC, 6) ? 0x9C00 : 0x9800;
+    uint16_t current_map = background_map;
     uint16_t addr;
     uint8_t colour;
 
@@ -28,7 +31,13 @@ void Ppu::loadBackGround() {
     for (int i = 0; i < 160; i++) {
         uint8_t offX = i + SCX;
 
-        uint8_t tile_idx = gb->readMemory(tile_map + ((offY / 8 * 32) + (offX / 8))); 
+        if (window && i >= (WX - 7)) {
+            current_map = window_map;
+            offY = WLY;
+            offX = i - WX - 7;
+        }
+
+        uint8_t tile_idx = gb->readMemory(current_map + ((offY / 8 * 32) + (offX / 8))); 
 
         if (base_pointer == 0x8000) {
             addr = base_pointer + (tile_idx * 16) + (offY % 8 * 2);
@@ -40,6 +49,7 @@ void Ppu::loadBackGround() {
 
         uint32_t colorfrompal = (pal >> (2 * colour)) & 3;
         frame_buffer[LY * 160 + i] = palette[colorfrompal];
+        if (window) WLY++;
     }
 }
 
