@@ -20,8 +20,10 @@ class Ppu {
         uint8_t LCDC; //FF40
         uint8_t STAT; //FF41
         uint8_t LY; //FF44
+        uint8_t WLY; //Internal Window Line counter
 
         uint8_t SCX, SCY; //FF43, FF42
+        uint8_t WX, WY; //FF4A, FF4B
 
         int dots;
         Mode current_mode;

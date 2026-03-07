@@ -12,6 +12,7 @@ Ppu::Ppu(Gb* parent) : gb(parent) {
 }
 
 void Ppu::loadBackGround() {
+    bool window = getBit(LCDC, 5); //Checks if the window is enabled
     uint16_t base_pointer = getBit(LCDC, 4) ? 0x8000 : 0x9000;
     uint16_t tile_map = getBit(LCDC, 3) ? 0x9C00 : 0x9800;
     uint16_t addr;
@@ -19,6 +20,8 @@ void Ppu::loadBackGround() {
 
     SCY = gb->readMemory(0xFF42);
     SCX = gb->readMemory(0xFF43);
+    WX = gb->readMemory(0xFF4A);
+    WY = gb->readMemory(0xFF4B);
 
     uint8_t pal = gb->readMemory(0xFF47); //BGP
     uint8_t offY = LY + SCY;
@@ -100,6 +103,7 @@ void Ppu::tick(int cycles) {
                     current_mode = MODE2_OAM;
                     checkSTAT();
                     LY = 0;
+                    WLY = 0;
                 }
                 gb->memory[0xFF44] = LY;
                 checkLYC();

@@ -113,7 +113,6 @@ int main(int, char**) {
                 cycles_this_frame += cycles;
                 step = false;
             }
-            
         }
 
         // Start the Dear ImGui frame

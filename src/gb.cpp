@@ -6,7 +6,8 @@
 #include <gb.h>
 
 Gb::Gb() : cpu(this), ppu(this){
-
+    dma_t_clocks = 0;
+    dma_byte_index = 0;
 }
 
 void Gb::loadBootRom(std::string path) { //Reads bytes from the bootrom and load it
@@ -138,6 +139,11 @@ uint8_t Gb::readMemory(uint16_t addr) {
 }
 
 void Gb::writeMemory(uint16_t addr, uint8_t value) {
+    if (DMATR) {
+        if (addr < 0xFF80 || addr > 0xFFFE) {
+            return;
+        }
+    }
     if (addr == 0xFF00) {
         memory[addr] = (memory[addr] & 0xCF) | (value & 0x30);
         updateJoypad();
@@ -171,10 +177,14 @@ void Gb::writeMemory(uint16_t addr, uint8_t value) {
         memory[addr + 0x2000] = value;
     }
 
+    if (addr >= 0xE000 && addr <= 0xFDFF) { //Echoes in echo RAM
+        memory[addr - 0x2000] = value;
+    }
+
     if (addr == 0xFF46) { //DMA transfer
-        DMATR= true;
+        DMATR = true;
         dma_source = value;
     }
 
-    memory[addr] = value; //Temporary, will need to be replaced by a proper handling
+    memory[addr] = value;
 }
