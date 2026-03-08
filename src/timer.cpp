@@ -7,6 +7,7 @@
 #include <timer.h>
 
 Timer::Timer(Cpu* parent) : cpu(parent) {
+    cycles_til_TIMA_IRQ = 0;
     sys_clock = 0xAB00;
     TAC = 0xF8;
     TMA = 0;

@@ -3770,7 +3770,7 @@ int Cpu::handleInterrupts() {
             }
         }
 
-        for (int i = 0; i < cycles; i++) {
+        for (int i = 0; i < cycles / 4; i++) {
             timer.increment(); 
 
             gb->memory[0xFF04] = getMSB(timer.sys_clock);
