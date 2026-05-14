@@ -42,5 +42,7 @@ class Gb {
         uint8_t readMemory(uint16_t addr);
         void writeMemory(uint16_t addr, uint8_t value);
 
+        void tickTimerAndPPU();
+
         Gb();
 };

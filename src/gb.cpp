@@ -107,9 +107,7 @@ void Gb::updateJoypad() {
 
 uint8_t Gb::readMemory(uint16_t addr) {
     if (DMATR) {
-        if (addr >= 0xFF80 && addr <= 0xFFFE) {
-            return memory[addr]; 
-        } else {
+        if (addr < 0xFF00 || addr > 0xFFFF) {
             return 0xFF;
         }
     }
@@ -126,6 +124,10 @@ uint8_t Gb::readMemory(uint16_t addr) {
         return ppu.readMemory(addr);
     }
 
+    if (addr == 0xFF03) {
+        return 0xFF;
+    }
+
     if (addr >= 0xFF04 && addr <= 0xFF07){
         return cpu.timer.readRegisters(addr);
     }
@@ -140,7 +142,7 @@ uint8_t Gb::readMemory(uint16_t addr) {
 
 void Gb::writeMemory(uint16_t addr, uint8_t value) {
     if (DMATR) {
-        if (addr < 0xFF80 || addr > 0xFFFE) {
+        if (addr < 0xFF00 || addr > 0xFFFF) {
             return;
         }
     }
@@ -153,6 +155,10 @@ void Gb::writeMemory(uint16_t addr, uint8_t value) {
     if (addr == 0xFF02 && value == 0x81) { //Intercepts serial output
         std::cout<<(char)memory[0xFF01];
         value &= 0x7F;
+    }
+
+    if (addr == 0xFF03) {
+        return;
     }
 
     if (addr == 0xFF50) {
@@ -187,4 +193,9 @@ void Gb::writeMemory(uint16_t addr, uint8_t value) {
     }
 
     memory[addr] = value;
+}
+
+void Gb::tickTimerAndPPU() {
+    cpu.timer.increment();
+    ppu.tick(4);
 }

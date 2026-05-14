@@ -54,6 +54,7 @@ class Cpu {
         Cpu(Gb* parent);
         int step();
         int handleInterrupts();
+        void callInterrupt(int jumpVector, int bit);
         bool getFlag(char flag);
         void setFlag(char flag, bool val);
 

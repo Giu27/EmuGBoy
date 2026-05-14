@@ -3677,12 +3677,7 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
     }
 
     for (int i = 0; i < cycles / 4; i++) {
-        timer.increment(); 
-
-        gb->memory[0xFF04] = getMSB(timer.sys_clock);
-        gb->memory[0xFF05] = timer.TIMA;
-        gb->memory[0xFF06] = timer.TMA;
-        gb->memory[0xFF07] = timer.TAC;
+        gb->tickTimerAndPPU(); 
     }
 
     if (gb->DMATR) {
@@ -3714,73 +3709,44 @@ int Cpu::handleInterrupts() {
     if (IME) {
         if (registers.ie & IF & 0x1F) {
             if ((getBit(registers.ie, 0) & getBit(IF, 0)) && IME) {//V-Blank Interrupt
-                registers.sp--;
-                gb->writeMemory(registers.sp, getMSB(registers.pc));
-                registers.sp--;
-                gb->writeMemory(registers.sp, getLSB(registers.pc));
-                registers.pc = 0x40;
-                IME = false;
-                clearBit(IF, 0);
-                gb->writeMemory(0xFF0F, IF);
-                cycles += 20;
+                callInterrupt(0x40, 0);
             }
             if ((getBit(registers.ie, 1) & getBit(IF, 1)) && IME) {//LCD/STAT Interrupt
-                registers.sp--;
-                gb->writeMemory(registers.sp, getMSB(registers.pc));
-                registers.sp--;
-                gb->writeMemory(registers.sp, getLSB(registers.pc));
-                registers.pc = 0x48;
-                IME = false;
-                clearBit(IF, 1);
-                gb->writeMemory(0xFF0F, IF);
-                cycles += 20;
+                callInterrupt(0x48, 1);
             }
             if ((getBit(registers.ie, 2) & getBit(IF, 2)) && IME) {//Timer Interrupt
-                registers.sp--;
-                gb->writeMemory(registers.sp, getMSB(registers.pc));
-                registers.sp--;
-                gb->writeMemory(registers.sp, getLSB(registers.pc));
-                registers.pc = 0x50;
-                IME = false;
-                clearBit(IF, 2);
-                gb->writeMemory(0xFF0F, IF);
-                cycles += 20;
+                callInterrupt(0x50, 2);
             }
             if ((getBit(registers.ie, 3) & getBit(IF, 3)) && IME) {//Serial Interrupt
-                registers.sp--;
-                gb->writeMemory(registers.sp, getMSB(registers.pc));
-                registers.sp--;
-                gb->writeMemory(registers.sp, getLSB(registers.pc));
-                registers.pc = 0x58;
-                IME = false;
-                clearBit(IF, 3);
-                gb->writeMemory(0xFF0F, IF);
-                cycles += 20;
+                callInterrupt(0x58, 3);
             }
             if ((getBit(registers.ie, 4) & getBit(IF, 4)) && IME) {//Joypad Interrupt
-                registers.sp--;
-                gb->writeMemory(registers.sp, getMSB(registers.pc));
-                registers.sp--;
-                gb->writeMemory(registers.sp, getLSB(registers.pc));
-                registers.pc = 0x60;
-                IME = false;
-                clearBit(IF, 4);
-                gb->writeMemory(0xFF0F, IF);
-                cycles += 20;
+                callInterrupt(0x60, 4);
             }
-        }
-
-        for (int i = 0; i < cycles / 4; i++) {
-            timer.increment(); 
-
-            gb->memory[0xFF04] = getMSB(timer.sys_clock);
-            gb->memory[0xFF05] = timer.TIMA;
-            gb->memory[0xFF06] = timer.TMA;
-            gb->memory[0xFF07] = timer.TAC;
         }
     }
     
     return cycles;
+}
+
+void Cpu::callInterrupt(int jumpVector, int bit) {
+    uint8_t IF = gb->readMemory(0xFF0F);
+    gb->tickTimerAndPPU();
+    gb->tickTimerAndPPU();
+
+    registers.sp--;
+    gb->writeMemory(registers.sp, getMSB(registers.pc));
+    registers.sp--;
+    gb->tickTimerAndPPU();
+    gb->writeMemory(registers.sp, getLSB(registers.pc));
+    gb->tickTimerAndPPU();
+
+    registers.pc = jumpVector;
+    gb->tickTimerAndPPU();
+
+    IME = false;
+    clearBit(IF, bit);
+    gb->writeMemory(0xFF0F, IF);
 }
 
 bool Cpu::getFlag(char flag) {
