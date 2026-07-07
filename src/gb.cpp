@@ -147,7 +147,7 @@ void Gb::writeMemory(uint16_t addr, uint8_t value) {
         }
     }
     if (addr == 0xFF00) {
-        memory[addr] = 0xCF | (value & 0x30);
+        memory[addr] = (memory[addr] & 0xCF) | (value & 0x30);
         updateJoypad();
         return;
     }
