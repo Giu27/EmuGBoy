@@ -70,7 +70,7 @@ int main(int, char**) {
     //setup GB Emu
     Gb gb;
     gb.loadBootRom("roms/bootrom.bin");
-    gb.loadRom("roms\\test_roms\\blargg\\interrupt_time\\interrupt_time.gb");
+    gb.loadRom("roms/Tetris.gb");
     int cycles = 0;
     int cycles_this_frame = 0;
     int cycles_per_frame = 70224;
@@ -109,6 +109,7 @@ int main(int, char**) {
         if (!single_stepping || step) {
             while ((!single_stepping && (cycles_this_frame < cycles_per_frame)) || step) {
                 cycles = gb.cpu.step();
+                gb.ppu.tick(cycles);
                 cycles_this_frame += cycles;
                 step = false;
             }

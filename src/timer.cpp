@@ -56,7 +56,7 @@ void Timer::writeRegisters(uint16_t address, uint8_t value) {
 }
 
 void Timer::detectEdge(bool before, bool after) {
-    if (before && !after && getBit(TAC, 2)) {
+    if (before && !after) {
         TIMA++; // Increment TIMA
         if (TIMA == 0) { // If we overflow, schedule IRQ
             cycles_til_TIMA_IRQ = 1;
@@ -103,9 +103,4 @@ void Timer::increment() {
         }
     }
     changeSystemClock((sys_clock + 1));
-
-    cpu->gb->memory[0xFF04] = getMSB(sys_clock);
-    cpu->gb->memory[0xFF05] = TIMA;
-    cpu->gb->memory[0xFF06] = TMA;
-    cpu->gb->memory[0xFF07] = TAC;
 }
