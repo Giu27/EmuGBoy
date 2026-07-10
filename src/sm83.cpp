@@ -3514,7 +3514,7 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
             break;
 
         case 0xE8:{//ADD SP e8
-            int8_t e = (int8_t) gb->readMemory(registers.pc);
+            int8_t e = static_cast<int8_t>(gb->readMemory(registers.pc));
             registers.pc++;
             uint32_t sp = getLSB(registers.sp);
             bool h = ((sp & 0x0F) + ((uint8_t)e & 0x0F))> 0x0F;
@@ -3676,20 +3676,15 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
         }
     }
 
-    for (int i = 0; i < cycles / 4; i++) {
+    for (int i = 0; i < (cycles + interrupt_cycles)/ 4; i++) {
         timer.increment(); 
-
-        gb->memory[0xFF04] = getMSB(timer.sys_clock);
-        gb->memory[0xFF05] = timer.TIMA;
-        gb->memory[0xFF06] = timer.TMA;
-        gb->memory[0xFF07] = timer.TAC;
     }
 
     if (gb->DMATR) {
-        gb->dma_t_clocks += cycles;
+        gb->dma_t_clocks += (cycles + interrupt_cycles);
         while (gb->dma_t_clocks >= 4 && gb->dma_byte_index < 160) {
             uint16_t src = (gb->dma_source << 8) | gb->dma_byte_index;
-            gb->memory[0xFE00 + gb->dma_byte_index] = gb->memory[src];
+            gb->memory[0xFE00 + gb->dma_byte_index] = gb->readMemory(src);
             gb->dma_byte_index++;
             gb->dma_t_clocks -= 4;
         }
@@ -3712,72 +3707,49 @@ int Cpu::handleInterrupts() {
 
     int cycles = 0;
     if (IME) {
-        if (registers.ie & IF & 0x1F) {
-            if ((getBit(registers.ie, 0) & getBit(IF, 0)) && IME) {//V-Blank Interrupt
-                registers.sp--;
-                gb->writeMemory(registers.sp, getMSB(registers.pc));
-                registers.sp--;
-                gb->writeMemory(registers.sp, getLSB(registers.pc));
+        uint8_t requested = registers.ie & IF & 0x1F;
+    
+        if (requested != 0) {
+            IME = false; 
+            cycles += 20;
+            
+            registers.sp--;
+            gb->writeMemory(registers.sp, getMSB(registers.pc));
+            registers.sp--;
+            gb->writeMemory(registers.sp, getLSB(registers.pc));
+
+            uint8_t final_request = registers.ie & IF & 0x1F;
+
+            if (final_request & 0x01) {         // V-Blank
                 registers.pc = 0x40;
-                IME = false;
                 clearBit(IF, 0);
-                gb->writeMemory(0xFF0F, IF);
-                cycles += 20;
-            }
-            if ((getBit(registers.ie, 1) & getBit(IF, 1)) && IME) {//LCD/STAT Interrupt
-                registers.sp--;
-                gb->writeMemory(registers.sp, getMSB(registers.pc));
-                registers.sp--;
-                gb->writeMemory(registers.sp, getLSB(registers.pc));
+            } else if (final_request & 0x02) {  // LCD STAT
                 registers.pc = 0x48;
-                IME = false;
                 clearBit(IF, 1);
-                gb->writeMemory(0xFF0F, IF);
-                cycles += 20;
-            }
-            if ((getBit(registers.ie, 2) & getBit(IF, 2)) && IME) {//Timer Interrupt
-                registers.sp--;
-                gb->writeMemory(registers.sp, getMSB(registers.pc));
-                registers.sp--;
-                gb->writeMemory(registers.sp, getLSB(registers.pc));
+            } else if (final_request & 0x04) {  // Timer
                 registers.pc = 0x50;
-                IME = false;
                 clearBit(IF, 2);
-                gb->writeMemory(0xFF0F, IF);
-                cycles += 20;
-            }
-            if ((getBit(registers.ie, 3) & getBit(IF, 3)) && IME) {//Serial Interrupt
-                registers.sp--;
-                gb->writeMemory(registers.sp, getMSB(registers.pc));
-                registers.sp--;
-                gb->writeMemory(registers.sp, getLSB(registers.pc));
+            } else if (final_request & 0x08) {  // Serial
                 registers.pc = 0x58;
-                IME = false;
                 clearBit(IF, 3);
-                gb->writeMemory(0xFF0F, IF);
-                cycles += 20;
-            }
-            if ((getBit(registers.ie, 4) & getBit(IF, 4)) && IME) {//Joypad Interrupt
-                registers.sp--;
-                gb->writeMemory(registers.sp, getMSB(registers.pc));
-                registers.sp--;
-                gb->writeMemory(registers.sp, getLSB(registers.pc));
+            } else if (final_request & 0x10) {  // Joypad
                 registers.pc = 0x60;
-                IME = false;
                 clearBit(IF, 4);
-                gb->writeMemory(0xFF0F, IF);
-                cycles += 20;
+            } else {
+                registers.pc = 0x0000;
             }
-        }
 
-        for (int i = 0; i < cycles / 4; i++) {
-            timer.increment(); 
+            gb->writeMemory(0xFF0F, IF);
+    }
 
-            gb->memory[0xFF04] = getMSB(timer.sys_clock);
-            gb->memory[0xFF05] = timer.TIMA;
-            gb->memory[0xFF06] = timer.TMA;
-            gb->memory[0xFF07] = timer.TAC;
-        }
+        //for (int i = 0; i < cycles / 4; i++) {
+        //    timer.increment(); 
+
+        //    gb->memory[0xFF04] = getMSB(timer.sys_clock);
+         //   gb->memory[0xFF05] = timer.TIMA;
+         //   gb->memory[0xFF06] = timer.TMA;
+         //   gb->memory[0xFF07] = timer.TAC;
+        //}
     }
     
     return cycles;

@@ -57,59 +57,39 @@ void Gb::loadRom(std::string path) { //Reads bytes from the rom and load it in m
 }
 
 void Gb::updateJoypad() {
-    //0: A, 1: B, 2: select; 3: start, 4: UP, 5: DOWN, 6: LEFT, 7: RIGHT
-    memory[0xFF00] = memory[0xFF00] | 0x0F;
-    if (!getBit(memory[0xFF00], 5)) {
-        if (keystate[0]) {
-            clearBit(memory[0xFF00], 0);
-            setBit(memory[0xFF0F], 4); //THIS IS CLEARLY WRONG: I NEED TO SLEEP
-        }
-        if (keystate[1]) {
-            clearBit(memory[0xFF00], 1);
-            setBit(memory[0xFF0F], 4);
-        }
-        if (keystate[2]) {
-            clearBit(memory[0xFF00], 2);
-            setBit(memory[0xFF0F], 4);
-        }
-        if (keystate[3]) {
-            clearBit(memory[0xFF00], 3);
-            setBit(memory[0xFF0F], 4);
-        }
-        if (!keystate[0]) setBit(memory[0xFF00], 0);
-        if (!keystate[1]) setBit(memory[0xFF00], 1);
-        if (!keystate[2]) setBit(memory[0xFF00], 2);
-        if (!keystate[3]) setBit(memory[0xFF00], 3);
+    uint8_t joyp = memory[0xFF00] | 0x0F; 
+    uint8_t old_joyp = memory[0xFF00];
+
+    // 0: A, 1: B, 2: select, 3: start, 4: UP, 5: DOWN, 6: LEFT, 7: RIGHT
+    
+    if (!getBit(joyp, 5)) {
+        if (keystate[0]) clearBit(joyp, 0); // A
+        if (keystate[1]) clearBit(joyp, 1); // B
+        if (keystate[2]) clearBit(joyp, 2); // Select
+        if (keystate[3]) clearBit(joyp, 3); // Start
     }
-    if (!getBit(memory[0xFF00], 4)) {
-        if (keystate[7]) {
-            clearBit(memory[0xFF00], 0);
-            setBit(memory[0xFF0F], 4);
+
+    // Check Direction Keys (Bit 4 is 0)
+    if (!getBit(joyp, 4)) {
+        if (keystate[7]) clearBit(joyp, 0); // Right
+        if (keystate[6]) clearBit(joyp, 1); // Left
+        if (keystate[4]) clearBit(joyp, 2); // Up
+        if (keystate[5]) clearBit(joyp, 3); // Down
+    }
+
+    memory[0xFF00] = joyp;
+
+    for (int i = 0; i < 4; i++) {
+        if (getBit(old_joyp, i) && !getBit(joyp, i)) {
+            setBit(memory[0xFF0F], 4); 
+            break;
         }
-        if (keystate[6]) {
-            clearBit(memory[0xFF00], 1);
-            setBit(memory[0xFF0F], 4);
-        }
-        if (keystate[5]) {
-            clearBit(memory[0xFF00], 2);
-            setBit(memory[0xFF0F], 4);
-        }
-        if (keystate[4]) {
-            clearBit(memory[0xFF00], 3);
-            setBit(memory[0xFF0F], 4);
-        }
-        if (!keystate[7]) setBit(memory[0xFF00], 0);
-        if (!keystate[6]) setBit(memory[0xFF00], 1);
-        if (!keystate[4]) setBit(memory[0xFF00], 2);
-        if (!keystate[5]) setBit(memory[0xFF00], 3);
     }
 }
 
 uint8_t Gb::readMemory(uint16_t addr) {
     if (DMATR) {
-        if (addr >= 0xFF80 && addr <= 0xFFFE) {
-            return memory[addr]; 
-        } else {
+        if (addr < 0xFF00 || addr > 0xFFFF) {
             return 0xFF;
         }
     }
@@ -140,12 +120,15 @@ uint8_t Gb::readMemory(uint16_t addr) {
 
 void Gb::writeMemory(uint16_t addr, uint8_t value) {
     if (DMATR) {
-        if (addr < 0xFF80 || addr > 0xFFFE) {
+        if (addr < 0xFF00 || addr > 0xFFFF) {
             return;
         }
     }
+    if (addr <= 0x7FFF) {
+        return;
+    }
     if (addr == 0xFF00) {
-        memory[addr] = (memory[addr] & 0xCF) | (value & 0x30);
+        memory[addr] = 0xCF | (value & 0x30);
         updateJoypad();
         return;
     }
@@ -157,6 +140,7 @@ void Gb::writeMemory(uint16_t addr, uint8_t value) {
 
     if (addr == 0xFF50) {
         boot_rom_mapped = false;
+        return;
     }
 
     if (addr >= 0xFF40 && addr <= 0xFF41 || addr == 0xFF44) {
@@ -171,6 +155,7 @@ void Gb::writeMemory(uint16_t addr, uint8_t value) {
 
     if (addr == 0xFFFF) { //IE Register
         cpu.registers.ie = value;
+        return;
     }
 
     if (addr >= 0xC000 && addr <= 0xDDFF) { //Echoes in echo RAM
@@ -182,8 +167,11 @@ void Gb::writeMemory(uint16_t addr, uint8_t value) {
     }
 
     if (addr == 0xFF46) { //DMA transfer
-        DMATR = true;
+        std::cout << "DMA triggered! Source high byte: 0x" << std::hex << (int)value << std::endl;
+        memory[addr] = value;
+        DMATR= true;
         dma_source = value;
+        return;
     }
 
     memory[addr] = value;

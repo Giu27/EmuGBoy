@@ -14,6 +14,11 @@ Ppu::Ppu(Gb* parent) : gb(parent) {
 
 void Ppu::loadBackGround() {
     bool window = getBit(LCDC, 5) && (LY >= WY); //Checks if the window is enabled and on line
+    bool window_drawn_this_line = false;
+
+    LCDC = gb->readMemory(0xFF40);
+    STAT = gb->readMemory(0xFF41);
+
     uint16_t base_pointer = getBit(LCDC, 4) ? 0x8000 : 0x9000;
     uint16_t background_map = getBit(LCDC, 3) ? 0x9C00 : 0x9800;
     uint16_t window_map = getBit(LCDC, 6) ? 0x9C00 : 0x9800;
@@ -34,7 +39,11 @@ void Ppu::loadBackGround() {
         if (window && i >= (WX - 7)) {
             current_map = window_map;
             offY = WLY;
-            offX = i - WX - 7;
+            offX = i - (WX - 7);
+            window_drawn_this_line = true;
+        } else {
+            current_map = background_map;
+            offY = LY + SCY;
         }
 
         uint8_t tile_idx = gb->readMemory(current_map + ((offY / 8 * 32) + (offX / 8))); 
@@ -43,14 +52,15 @@ void Ppu::loadBackGround() {
             addr = base_pointer + (tile_idx * 16) + (offY % 8 * 2);
             colour = (getBit(gb->readMemory(addr), 7- (offX % 8))) + (getBit(gb->readMemory(addr + 1), 7- (offX % 8))) * 2;
         } else {
-            addr = base_pointer + ((int8_t) tile_idx * 16) + (offY % 8 * 2);
+            int8_t casted_idx = static_cast<int8_t>(tile_idx);
+            addr = base_pointer + (casted_idx * 16) + (offY % 8 * 2);
             colour = (getBit(gb->readMemory(addr), 7- (offX % 8))) + (getBit(gb->readMemory(addr + 1), 7- (offX % 8))) * 2;
         }
 
         uint32_t colorfrompal = (pal >> (2 * colour)) & 3;
         frame_buffer[LY * 160 + i] = palette[colorfrompal];
-        if (window) WLY++;
     }
+    if (window_drawn_this_line) WLY++;
 }
 
 void Ppu::checkLYC() {
@@ -68,7 +78,7 @@ void Ppu::checkLYC() {
 }
 
 void Ppu::checkSTAT() {
-    STAT |= current_mode;
+    STAT = (STAT & ~0x03) | current_mode;
     gb->writeMemory(0xFF41, STAT);
     bool interrupt = false;
     if (current_mode == MODE0_HBLANK && getBit(STAT, 3)){
