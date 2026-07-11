@@ -110,6 +110,16 @@ uint8_t Gb::readMemory(uint16_t addr) {
         return cpu.timer.readRegisters(addr);
     }
 
+    if (addr >= 0xFE00 && addr <= 0xFE9F) {
+        if (OAM_block) {
+            return 0xFF;
+        }
+    }
+
+    if (addr >= 0xFEA0 && addr <= 0xFEFF) {
+        return 0xFF;
+    }
+
     if (addr == 0xFF0F){
         return memory[addr] | 0xE0;
     }
@@ -124,9 +134,21 @@ void Gb::writeMemory(uint16_t addr, uint8_t value) {
             return;
         }
     }
+
     if (addr <= 0x7FFF) {
         return;
     }
+
+    if (addr >= 0xFE00 && addr <= 0xFE9F) {
+        if (OAM_block) {
+            return;
+        }
+    }
+
+    if (addr >= 0xFEA0 && addr <= 0xFEFF) {
+        return;
+    }
+
     if (addr == 0xFF00) {
         memory[addr] = 0xCF | (value & 0x30);
         updateJoypad();
@@ -167,9 +189,9 @@ void Gb::writeMemory(uint16_t addr, uint8_t value) {
     }
 
     if (addr == 0xFF46) { //DMA transfer
-        std::cout << "DMA triggered! Source high byte: 0x" << std::hex << (int)value << std::endl;
+        //std::cout << "DMA triggered! Source high byte: 0x" << std::hex << (int)value << std::endl;
         memory[addr] = value;
-        DMATR= true;
+        DMATR = true;
         dma_source = value;
         return;
     }

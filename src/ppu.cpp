@@ -100,6 +100,7 @@ void Ppu::tick(int cycles) {
     
     switch(current_mode) { //TODO Properly handle mode 0 and mode 3 duration
         case MODE0_HBLANK:
+            gb->OAM_block = false;
             if (dots >= 204) {
                 LY++;
                 gb->memory[0xFF44] = LY;
@@ -131,6 +132,7 @@ void Ppu::tick(int cycles) {
             break;
 
         case MODE2_OAM:
+            gb->OAM_block = true;
             if (dots >= 80){
                 current_mode = MODE3_DRAW;
                 dots -= 80;
