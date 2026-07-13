@@ -47,7 +47,10 @@ void Gb::loadRom(std::string path) { //Reads bytes from the rom and load it in m
 	file.close();
 
     for (unsigned int i = 0; i < size; i++) {
-		memory[i] = buffer[i];
+        if (i <= 0x3FFF) {
+            memory[i] = buffer[i];
+        }
+        rom.push_back(buffer[i]);
 	}
 
     if (memory[0x014D] != 0x00) {
@@ -93,6 +96,11 @@ uint8_t Gb::readMemory(uint16_t addr) {
             return 0xFF;
         }
     }
+
+    if (addr >= 0xA000 && addr <= 0xBFFF && !external_RAM) {
+        return 0xFF;
+    }
+
     //if (addr == 0xFF44) return 0x90; //Stub LY register, useful for test roms
     if (addr == 0xFF00) {
         updateJoypad();
@@ -136,6 +144,10 @@ void Gb::writeMemory(uint16_t addr, uint8_t value) {
     }
 
     if (addr <= 0x7FFF) {
+        return;
+    }
+
+    if (addr >= 0xA000 && addr <= 0xBFFF && !external_RAM) {
         return;
     }
 

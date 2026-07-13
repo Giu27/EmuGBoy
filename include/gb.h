@@ -2,6 +2,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include <sm83.h>
 #include <ppu.h>
 
@@ -27,12 +28,14 @@ class Gb {
         Cpu cpu;
         Ppu ppu;
         uint8_t memory [MEMORY_SIZE] = {0};
+        std::vector<uint8_t> rom;
         uint8_t boot_rom [0xFF] = {0};
 
         bool keystate[9] = {0};
         bool boot_rom_mapped = true;
         bool DMATR = false;
         bool OAM_block = false;
+        bool external_RAM = false;
         uint8_t dma_source;
         int dma_t_clocks;
         int dma_byte_index;
