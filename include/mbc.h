@@ -9,7 +9,25 @@ class Mbc {
         std::vector<uint8_t> rom;
         std::vector<uint8_t> ram;
 
-        Mbc(std::vector<uint8_t> romData) : rom(std::move(romData)) {}
+        bool ramEnabled = false;
+        bool hasBattery = false;
+
+        Mbc(std::vector<uint8_t> romData, bool battery) : rom(std::move(romData)), hasBattery(battery) {
+            uint32_t ramSize = 0;
+            switch (rom[0x0149]) {
+                case 0x01: ramSize = 0x800;   break; // 2 KB
+                case 0x02: ramSize = 0x2000;   break; // 8 KB
+                case 0x03: ramSize = 0x8000;  break; // 32 KB (4 banks of 8 KB)
+                case 0x04: ramSize = 0x20000; break; // 128 KB (16 banks of 8 KB)
+                case 0x05: ramSize = 0x10000; break; // 64 KB (8 banks of 8 KB)
+                default:   ramSize = 0;      break; 
+            }
+        
+            if (ramSize > 0) {
+                ram.resize(ramSize, 0xFF);
+            }
+
+        }
 
         virtual ~Mbc() = default;
 
