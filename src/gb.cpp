@@ -47,11 +47,11 @@ void Gb::loadRom(std::string path) { //Reads bytes from the rom and load it in m
 	file.close();
 
     for (unsigned int i = 0; i < size; i++) {
-        if (i <= 0x3FFF) {
-            memory[i] = buffer[i];
-        }
         rom.push_back(buffer[i]);
 	}
+
+    MBC_type = rom[0x0147];
+    mbc = init_mbc(rom);
 
     if (memory[0x014D] != 0x00) {
         cpu.setFlag('c', true);
@@ -97,17 +97,21 @@ uint8_t Gb::readMemory(uint16_t addr) {
         }
     }
 
-    if (addr >= 0xA000 && addr <= 0xBFFF && !external_RAM) {
-        return 0xFF;
+    if (addr <= 0xFF && boot_rom_mapped) {
+        return boot_rom[addr];
+    }
+
+    if (addr <= 0x7FFF) {
+        return mbc->readRom(addr);
+    }
+
+    if (addr >= 0xA000 && addr <= 0xBFFF) {
+        return mbc->readRam(addr);
     }
 
     //if (addr == 0xFF44) return 0x90; //Stub LY register, useful for test roms
     if (addr == 0xFF00) {
         updateJoypad();
-    }
-    
-    if (addr <= 0xFF && boot_rom_mapped) {
-        return boot_rom[addr];
     }
 
     if (addr >= 0xFF40 && addr <= 0xFF41 || addr == 0xFF44) {
@@ -144,10 +148,11 @@ void Gb::writeMemory(uint16_t addr, uint8_t value) {
     }
 
     if (addr <= 0x7FFF) {
-        return;
+        mbc->writeRom(addr, value);
     }
 
-    if (addr >= 0xA000 && addr <= 0xBFFF && !external_RAM) {
+    if (addr >= 0xA000 && addr <= 0xBFFF) {
+        mbc->writeRam(addr, value);
         return;
     }
 

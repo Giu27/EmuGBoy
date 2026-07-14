@@ -129,7 +129,7 @@ int main(int, char**) {
 
             ImGui::Text("Windows:");               
             ImGui::Checkbox("Registers", &show_registers);
-            ImGui::Checkbox("Memory", &show_memory);
+            ImGui::Checkbox("Memory (without ROM)", &show_memory);
             ImGui::Text("Other tools:");
             ImGui::Checkbox("Pause Emulation", &single_stepping);
             ImGui::SameLine();
@@ -138,7 +138,7 @@ int main(int, char**) {
             } else {
                 step = false;
             }
-
+            ImGui::Text("MBC Type: %d", gb.MBC_type);
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
             ImGui::End();
         }

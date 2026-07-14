@@ -3,8 +3,10 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include <sm83.h>
 #include <ppu.h>
+#include <mbc.h>
 
 #define MEMORY_SIZE 0x10000
 
@@ -35,7 +37,8 @@ class Gb {
         bool boot_rom_mapped = true;
         bool DMATR = false;
         bool OAM_block = false;
-        bool external_RAM = false;
+        std::unique_ptr<Mbc> mbc;
+        uint8_t MBC_type;
         uint8_t dma_source;
         int dma_t_clocks;
         int dma_byte_index;
