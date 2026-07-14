@@ -149,6 +149,7 @@ void Gb::writeMemory(uint16_t addr, uint8_t value) {
 
     if (addr <= 0x7FFF) {
         mbc->writeRom(addr, value);
+        return;
     }
 
     if (addr >= 0xA000 && addr <= 0xBFFF) {
