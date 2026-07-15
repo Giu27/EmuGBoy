@@ -10,10 +10,14 @@ Ppu::Ppu(Gb* parent) : gb(parent) {
     current_mode = MODE2_OAM;
     dots = 0;
     WLY = 0;
+    window_triggered = false;
 }
 
 void Ppu::loadBackGround() {
-    bool window = getBit(LCDC, 5) && (LY >= WY); //Checks if the window is enabled and on line
+    if (getBit(LCDC, 5) && LY == WY) {
+        window_triggered = true;
+    }
+    bool window = getBit(LCDC, 5) && window_triggered; //Checks if the window is enabled and on line
     bool window_drawn_this_line = false;
 
     LCDC = gb->readMemory(0xFF40);
@@ -28,8 +32,8 @@ void Ppu::loadBackGround() {
 
     SCY = gb->readMemory(0xFF42);
     SCX = gb->readMemory(0xFF43);
-    WX = gb->readMemory(0xFF4A);
-    WY = gb->readMemory(0xFF4B);
+    WY = gb->readMemory(0xFF4A);
+    WX = gb->readMemory(0xFF4B);
 
     uint8_t pal = gb->readMemory(0xFF47); //BGP
     uint8_t offY = LY + SCY;
@@ -108,6 +112,7 @@ void Ppu::tick(int cycles) {
                 if (LY == 144) {
                     current_mode = MODE1_VBLANK;
                     setBit(gb->memory[0xFF0F], 0);
+                    WLY = 0;
                 } else {
                     current_mode = MODE2_OAM; 
                 }
@@ -140,6 +145,9 @@ void Ppu::tick(int cycles) {
             break;
 
         case MODE3_DRAW:
+            if (LY == 0) {
+                window_triggered = false;
+            }
             loadBackGround();
             if (dots >= 172) {
                current_mode = MODE0_HBLANK; 

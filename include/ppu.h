@@ -25,6 +25,8 @@ class Ppu {
         uint8_t SCX, SCY; //FF43, FF42
         uint8_t WX, WY; //FF4A, FF4B
 
+        bool window_triggered;
+
         int dots;
         Mode current_mode;
 

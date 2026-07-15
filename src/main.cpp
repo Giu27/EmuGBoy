@@ -70,7 +70,7 @@ int main(int, char**) {
     //setup GB Emu
     Gb gb;
     gb.loadBootRom("roms/bootrom.bin");
-    gb.loadRom("roms\\tloz.gb");
+    gb.loadRom("roms\\test_roms\\turtle-tests\\window_y_trigger_wx_offscreen\\window_y_trigger_wx_offscreen.gb"); //roms\\test_roms\\turtle-tests\\window_y_trigger_wx_offscreen\\window_y_trigger_wx_offscreen.gb
     int cycles = 0;
     int cycles_this_frame = 0;
     int cycles_per_frame = 70224;
