@@ -14,57 +14,57 @@ Ppu::Ppu(Gb* parent) : gb(parent) {
 }
 
 void Ppu::loadBackGround() {
-    if (getBit(LCDC, 5) && LY == WY) {
-        window_triggered = true;
-    }
-    bool window = getBit(LCDC, 5) && window_triggered; //Checks if the window is enabled and on line
-    bool window_drawn_this_line = false;
-
     LCDC = gb->readMemory(0xFF40);
     STAT = gb->readMemory(0xFF41);
-
-    uint16_t base_pointer = getBit(LCDC, 4) ? 0x8000 : 0x9000;
-    uint16_t background_map = getBit(LCDC, 3) ? 0x9C00 : 0x9800;
-    uint16_t window_map = getBit(LCDC, 6) ? 0x9C00 : 0x9800;
-    uint16_t current_map = background_map;
-    uint16_t addr;
-    uint8_t colour;
-
     SCY = gb->readMemory(0xFF42);
     SCX = gb->readMemory(0xFF43);
-    WY = gb->readMemory(0xFF4A);
-    WX = gb->readMemory(0xFF4B);
+    WY  = gb->readMemory(0xFF4A);
+    WX  = gb->readMemory(0xFF4B);
+    uint8_t pal = gb->readMemory(0xFF47);
 
-    uint8_t pal = gb->readMemory(0xFF47); //BGP
-    uint8_t offY = LY + SCY;
-    for (int i = 0; i < 160; i++) {
-        uint8_t offX = i + SCX;
-
-        if (window && i >= (WX - 7)) {
-            current_map = window_map;
-            offY = WLY;
-            offX = i - (WX - 7);
-            window_drawn_this_line = true;
-        } else {
-            current_map = background_map;
-            offY = LY + SCY;
+    if (!getBit(LCDC, 0)) {
+        for (int i = 0; i < 160; i++) {
+            frame_buffer[LY * 160 + i] = palette[0];
         }
-
-        uint8_t tile_idx = gb->readMemory(current_map + ((offY / 8 * 32) + (offX / 8))); 
-
-        if (base_pointer == 0x8000) {
-            addr = base_pointer + (tile_idx * 16) + (offY % 8 * 2);
-            colour = (getBit(gb->readMemory(addr), 7- (offX % 8))) + (getBit(gb->readMemory(addr + 1), 7- (offX % 8))) * 2;
-        } else {
-            int8_t casted_idx = static_cast<int8_t>(tile_idx);
-            addr = base_pointer + (casted_idx * 16) + (offY % 8 * 2);
-            colour = (getBit(gb->readMemory(addr), 7- (offX % 8))) + (getBit(gb->readMemory(addr + 1), 7- (offX % 8))) * 2;
-        }
-
-        uint32_t colorfrompal = (pal >> (2 * colour)) & 3;
-        frame_buffer[LY * 160 + i] = palette[colorfrompal];
+        return;
     }
-    if (window_drawn_this_line) WLY++;
+
+    if (getBit(LCDC, 5) && LY == WY) window_triggered = true;
+    bool window = getBit(LCDC, 5) && window_triggered && WX <= 166;
+    bool window_drawn = false;
+
+    bool unsigned_tiles = getBit(LCDC, 4);
+    uint16_t bg_map  = getBit(LCDC, 3) ? 0x9C00 : 0x9800;
+    uint16_t win_map = getBit(LCDC, 6) ? 0x9C00 : 0x9800;
+
+    for (int i = 0; i < 160; i++) {
+        uint16_t map;
+        uint8_t x, y;
+        if (window && i >= WX - 7) {
+            map = win_map; y = WLY; x = i - (WX - 7);
+            window_drawn = true;
+        } else {
+            map = bg_map; y = LY + SCY; x = i + SCX;
+        }
+
+        uint8_t tile = gb->readMemory(map + ((y >> 3) << 5) + (x >> 3)); // >> 3 << 5 = /8 * 32
+        uint16_t addr = unsigned_tiles ? 0x8000 + tile * 16 : 0x9000 + static_cast<int8_t>(tile) * 16;
+        addr += (y & 7) * 2;
+
+        int bit = 7 - (x & 7);
+        uint8_t colour = getBit(gb->readMemory(addr), bit)  | (getBit(gb->readMemory(addr + 1), bit) << 1);
+
+        frame_buffer[LY * 160 + i] = palette[(pal >> (colour * 2)) & 3];
+    }
+
+    /*if (window_drawn && LY >= 120) {
+        printf("LY=%d WY=%d WX=%d WLY=%d LCDC=%02X\n", LY, WY, WX, WLY, LCDC);
+    }
+    if (window_drawn && WLY != LY - WY) {
+        printf("DESYNC: LY=%d WY=%d WLY=%d\n", LY, WY, WLY);
+    }*/
+
+    if (window_drawn) WLY++;
 }
 
 void Ppu::checkLYC() {
@@ -112,7 +112,6 @@ void Ppu::tick(int cycles) {
                 if (LY == 144) {
                     current_mode = MODE1_VBLANK;
                     setBit(gb->memory[0xFF0F], 0);
-                    WLY = 0;
                 } else {
                     current_mode = MODE2_OAM; 
                 }
@@ -130,6 +129,7 @@ void Ppu::tick(int cycles) {
                     checkSTAT();
                     LY = 0;
                     WLY = 0;
+                    window_triggered = false;
                 }
                 gb->memory[0xFF44] = LY;
                 checkLYC();
@@ -148,11 +148,12 @@ void Ppu::tick(int cycles) {
             if (LY == 0) {
                 window_triggered = false;
             }
-            loadBackGround();
+
             if (dots >= 172) {
-               current_mode = MODE0_HBLANK; 
-               checkSTAT();
-               dots -= 172;
+                loadBackGround();
+                current_mode = MODE0_HBLANK; 
+                checkSTAT();
+                dots -= 172;
             }
             break;
     }
