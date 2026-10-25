@@ -18,11 +18,11 @@ void Ppu::loadBackGround() {
     STAT = gb->readMemory(0xFF41);
     SCY = gb->readMemory(0xFF42);
     SCX = gb->readMemory(0xFF43);
-    WY  = gb->readMemory(0xFF4A);
-    WX  = gb->readMemory(0xFF4B);
+    WY = gb->readMemory(0xFF4A);
+    WX = gb->readMemory(0xFF4B);
     uint8_t pal = gb->readMemory(0xFF47);
 
-    if (!getBit(LCDC, 0)) {
+    if (!getBit(LCDC, 0)) { //background not enabled
         for (int i = 0; i < 160; i++) {
             frame_buffer[LY * 160 + i] = palette[0];
         }
@@ -41,10 +41,14 @@ void Ppu::loadBackGround() {
         uint16_t map;
         uint8_t x, y;
         if (window && i >= WX - 7) {
-            map = win_map; y = WLY; x = i - (WX - 7);
+            map = win_map; 
+            y = WLY; 
+            x = i - (WX - 7);
             window_drawn = true;
         } else {
-            map = bg_map; y = LY + SCY; x = i + SCX;
+            map = bg_map; 
+            y = LY + SCY; 
+            x = i + SCX;
         }
 
         uint8_t tile = gb->readMemory(map + ((y >> 3) << 5) + (x >> 3)); // >> 3 << 5 = /8 * 32
@@ -57,6 +61,7 @@ void Ppu::loadBackGround() {
         frame_buffer[LY * 160 + i] = palette[(pal >> (colour * 2)) & 3];
     }
 
+    //Checks LY and WLY are synchronized,needed it for the bugged HUD of Tloz Link's Awakening 
     /*if (window_drawn && LY >= 120) {
         printf("LY=%d WY=%d WX=%d WLY=%d LCDC=%02X\n", LY, WY, WX, WLY, LCDC);
     }
