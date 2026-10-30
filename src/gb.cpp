@@ -90,8 +90,8 @@ void Gb::updateJoypad() {
     }
 }
 
-uint8_t Gb::readMemory(uint16_t addr) {
-    if (DMATR) {
+uint8_t Gb::readMemory(uint16_t addr, bool bypassDMALock) {
+    if (DMATR && !bypassDMALock) {
         if (addr < 0xFF00 || addr > 0xFFFF) {
             return 0xFF;
         }

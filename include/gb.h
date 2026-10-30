@@ -46,7 +46,7 @@ class Gb {
         void loadRom(std::string path);
         void loadBootRom(std::string path);
         void updateJoypad();
-        uint8_t readMemory(uint16_t addr);
+        uint8_t readMemory(uint16_t addr, bool bypassDMALock = false);
         void writeMemory(uint16_t addr, uint8_t value);
 
         Gb();

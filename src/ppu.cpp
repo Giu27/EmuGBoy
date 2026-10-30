@@ -72,6 +72,23 @@ void Ppu::loadBackGround() {
     if (window_drawn) WLY++;
 }
 
+void Ppu::loadFromOAM() {
+    int h = getBit(LCDC, 2) ? 16 : 8; //LCDC bit 2 decides objects vertical size.
+    for (int i = 0; i < 40 && objects_buffer.size() < 10; i++) {
+        uint8_t y = gb->memory[i * 4 + 0xFE00];
+        if (LY + 16 >= y && LY + 16 < y + h) {
+            objects_buffer.push_back({gb->memory[i * 4 + 0xFE00], gb->memory[i * 4 + 0xFE00], gb->memory[i * 4 + 0xFE00], gb->memory[i * 4 + 0xFE00]});
+        }
+    }
+}
+
+void Ppu::loadObjects() {
+    for (int i = 0; i < objects_buffer.size(); i++) {
+        Object obj = objects_buffer[i];
+        std::cout<<"Y:"<<std::hex<<(int)obj.Y<<" X:"<<(int)obj.X<<" Tile:"<<(int)obj.tile_idx<<" Flags:"<<(int)obj.flags<<std::endl;
+    }
+}
+
 void Ppu::checkLYC() {
     uint8_t LYC = gb->readMemory(0xFF45);
     if (LY == LYC) {
@@ -144,8 +161,10 @@ void Ppu::tick(int cycles) {
         case MODE2_OAM:
             gb->OAM_block = true;
             if (dots >= 80){
+                loadFromOAM();
                 current_mode = MODE3_DRAW;
                 dots -= 80;
+                checkSTAT();
             }        
             break;
 
@@ -156,6 +175,8 @@ void Ppu::tick(int cycles) {
 
             if (dots >= 172) {
                 loadBackGround();
+                loadObjects();
+                objects_buffer.clear();
                 current_mode = MODE0_HBLANK; 
                 checkSTAT();
                 dots -= 172;

@@ -12,10 +12,18 @@ enum Mode {
     MODE3_DRAW
 };
 
+struct Object {
+    uint8_t Y;
+    uint8_t X;
+    uint8_t tile_idx;
+    uint8_t flags;
+};
+
 class Ppu {
     public:
         uint32_t palette[4] = {0xE0F8D0FF, 0x88C070FF, 0x346856FF, 0x081820FF};
         uint32_t frame_buffer[160 * 144];
+        std::vector<Object> objects_buffer; //Stores up to 10 sprites
 
         uint8_t LCDC; //FF40
         uint8_t STAT; //FF41
@@ -32,6 +40,8 @@ class Ppu {
 
         Ppu(Gb* parent);
         void loadBackGround();
+        void loadObjects();
+        void loadFromOAM();
         void tick(int cycles);
         uint8_t readMemory(uint16_t addr);
         void writeMemory(uint16_t addr, uint8_t value);
