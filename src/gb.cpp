@@ -19,6 +19,7 @@ void Gb::loadBootRom(std::string path) { //Reads bytes from the bootrom and load
     }
 
     cpu.registers.pc = 0;
+    ppu.LCDC = 0;
 
     std::streamsize size = file.tellg();
     std::vector<char> buffer(size);
@@ -90,7 +91,7 @@ void Gb::updateJoypad() {
     }
 }
 
-uint8_t Gb::readMemory(uint16_t addr, bool bypassDMALock) {
+uint8_t Gb::readMemory(uint16_t addr, bool bypassDMALock, bool bypassDrawLock) {
     if (DMATR && !bypassDMALock) {
         if (addr < 0xFF00 || addr > 0xFFFF) {
             return 0xFF;
@@ -103,6 +104,12 @@ uint8_t Gb::readMemory(uint16_t addr, bool bypassDMALock) {
 
     if (addr <= 0x7FFF) {
         return mbc->readRom(addr);
+    }
+
+    if (addr >= 0x8000 && addr <= 0x9FFF) {
+        if (vram_block && !bypassDrawLock) {
+            return 0xFF;
+        }
     }
 
     if (addr >= 0xA000 && addr <= 0xBFFF) {
@@ -150,6 +157,12 @@ void Gb::writeMemory(uint16_t addr, uint8_t value) {
     if (addr <= 0x7FFF) {
         mbc->writeRom(addr, value);
         return;
+    }
+
+    if (addr >= 0x8000 && addr <= 0x9FFF) {
+        if (vram_block) {
+            return;
+        }
     }
 
     if (addr >= 0xA000 && addr <= 0xBFFF) {

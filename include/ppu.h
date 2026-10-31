@@ -34,6 +34,7 @@ class Ppu {
         uint8_t WX, WY; //FF4A, FF4B
 
         bool window_triggered;
+        bool prev_LCDC_b7;
 
         int dots;
         Mode current_mode;

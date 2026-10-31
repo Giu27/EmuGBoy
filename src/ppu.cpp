@@ -51,12 +51,12 @@ void Ppu::loadBackGround() {
             x = i + SCX;
         }
 
-        uint8_t tile = gb->readMemory(map + ((y >> 3) << 5) + (x >> 3)); // >> 3 << 5 = /8 * 32
+        uint8_t tile = gb->readMemory(map + ((y >> 3) << 5) + (x >> 3), false, true); // >> 3 << 5 = /8 * 32
         uint16_t addr = unsigned_tiles ? 0x8000 + tile * 16 : 0x9000 + static_cast<int8_t>(tile) * 16;
         addr += (y & 7) * 2;
 
         int bit = 7 - (x & 7);
-        uint8_t colour = getBit(gb->readMemory(addr), bit)  | (getBit(gb->readMemory(addr + 1), bit) << 1);
+        uint8_t colour = getBit(gb->readMemory(addr, false, true), bit)  | (getBit(gb->readMemory(addr + 1, false, true), bit) << 1);
 
         frame_buffer[LY * 160 + i] = palette[(pal >> (colour * 2)) & 3];
     }
@@ -83,9 +83,27 @@ void Ppu::loadFromOAM() {
 }
 
 void Ppu::loadObjects() {
-    for (int i = 0; i < objects_buffer.size(); i++) {
-        Object obj = objects_buffer[i];
-        std::cout<<"Y:"<<std::hex<<(int)obj.Y<<" X:"<<(int)obj.X<<" Tile:"<<(int)obj.tile_idx<<" Flags:"<<(int)obj.flags<<std::endl;
+    if (getBit(LCDC, 1)) {
+        int h = getBit(LCDC, 2) ? 16 : 8;
+        bool claimed[160] = {};
+        for (int i = 0; i < objects_buffer.size(); i++) {
+            Object obj = objects_buffer[i];
+            //std::cout<<"Y:"<<std::hex<<(int)obj.Y<<" X:"<<(int)obj.X<<" Tile:"<<(int)obj.tile_idx<<" Flags:"<<(int)obj.flags<<std::endl;
+            if (obj.X == 0 || obj.X >= 168) { //If sprite is offscreen just skips it
+                continue;
+            }
+
+            uint8_t pal = getBit(obj.flags, 4) ? gb->readMemory(0xFF49) : gb->readMemory(0xFF48);
+            int row = LY + 16 - obj.Y;
+            if (getBit(obj.flags, 6)) { //Vertical flip
+                row = h - 1 - row;
+            } 
+
+            uint8_t tile = h == 16 ? (obj.tile_idx & 0xFE) : obj.tile_idx;
+            uint16_t addr = 0x8000 + tile * 16 + row * 2;
+            uint8_t lo = gb->readMemory(addr, false, true);
+            uint8_t hi = gb->readMemory(addr + 1, false, true);
+        }
     }
 }
 
@@ -122,7 +140,9 @@ void Ppu::checkSTAT() {
 }
 
 void Ppu::tick(int cycles) {
-    dots += cycles;
+    if (getBit(LCDC, 7)) {
+        dots += cycles;
+    }     
     
     switch(current_mode) { //TODO Properly handle mode 0 and mode 3 duration
         case MODE0_HBLANK:
@@ -162,6 +182,7 @@ void Ppu::tick(int cycles) {
             gb->OAM_block = true;
             if (dots >= 80){
                 loadFromOAM();
+                gb->vram_block = true;
                 current_mode = MODE3_DRAW;
                 dots -= 80;
                 checkSTAT();
@@ -177,6 +198,7 @@ void Ppu::tick(int cycles) {
                 loadBackGround();
                 loadObjects();
                 objects_buffer.clear();
+                gb->vram_block = false;
                 current_mode = MODE0_HBLANK; 
                 checkSTAT();
                 dots -= 172;
@@ -195,8 +217,19 @@ uint8_t Ppu::readMemory(uint16_t addr) {
 void Ppu::writeMemory(uint16_t addr, uint8_t value) {
     if (addr == 0xFF44) return;
     if (addr == 0xFF40) {
+        prev_LCDC_b7 = getBit(LCDC, 7);
         LCDC = value;
         gb->memory[0xFF40] = LCDC;
+
+        if (getBit(LCDC, 7) != prev_LCDC_b7) {
+            if (prev_LCDC_b7 == true) {
+                LY = 0;
+                current_mode = MODE0_HBLANK;
+                gb->OAM_block = false;
+                gb->vram_block = false;
+                dots = 0;
+            }
+        }
     }
     if (addr == 0xFF41) {
         STAT = value;

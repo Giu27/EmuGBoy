@@ -3684,7 +3684,7 @@ int Cpu::step() { //Returns number of T-cycles (M-Cycles = T-Cycles / 4)
         gb->dma_t_clocks += (cycles + interrupt_cycles);
         while (gb->dma_t_clocks >= 4 && gb->dma_byte_index < 160) {
             uint16_t src = (gb->dma_source << 8) | gb->dma_byte_index;
-            gb->memory[0xFE00 + gb->dma_byte_index] = gb->readMemory(src, true);
+            gb->memory[0xFE00 + gb->dma_byte_index] = gb->readMemory(src, true, true);
             gb->dma_byte_index++;
             gb->dma_t_clocks -= 4;
         }

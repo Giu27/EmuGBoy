@@ -37,6 +37,7 @@ class Gb {
         bool boot_rom_mapped = true;
         bool DMATR = false;
         bool OAM_block = false;
+        bool vram_block = false;
         std::unique_ptr<Mbc> mbc;
         uint8_t MBC_type;
         uint8_t dma_source;
@@ -46,7 +47,7 @@ class Gb {
         void loadRom(std::string path);
         void loadBootRom(std::string path);
         void updateJoypad();
-        uint8_t readMemory(uint16_t addr, bool bypassDMALock = false);
+        uint8_t readMemory(uint16_t addr, bool bypassDMALock = false, bool bypassDrawLock = false);
         void writeMemory(uint16_t addr, uint8_t value);
 
         Gb();
