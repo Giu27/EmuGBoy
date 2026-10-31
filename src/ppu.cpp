@@ -25,6 +25,7 @@ void Ppu::loadBackGround() {
     if (!getBit(LCDC, 0)) { //background not enabled
         for (int i = 0; i < 160; i++) {
             frame_buffer[LY * 160 + i] = palette[0];
+            bg_colour_id[i] = 0;
         }
         return;
     }
@@ -57,6 +58,7 @@ void Ppu::loadBackGround() {
 
         int bit = 7 - (x & 7);
         uint8_t colour = getBit(gb->readMemory(addr, false, true), bit)  | (getBit(gb->readMemory(addr + 1, false, true), bit) << 1);
+        bg_colour_id[i] = colour;
 
         frame_buffer[LY * 160 + i] = palette[(pal >> (colour * 2)) & 3];
     }
@@ -77,7 +79,7 @@ void Ppu::loadFromOAM() {
     for (int i = 0; i < 40 && objects_buffer.size() < 10; i++) {
         uint8_t y = gb->memory[i * 4 + 0xFE00];
         if (LY + 16 >= y && LY + 16 < y + h) {
-            objects_buffer.push_back({gb->memory[i * 4 + 0xFE00], gb->memory[i * 4 + 0xFE00], gb->memory[i * 4 + 0xFE00], gb->memory[i * 4 + 0xFE00]});
+            objects_buffer.push_back({gb->memory[i * 4 + 0xFE00], gb->memory[i * 4 + 0xFE00 + 1], gb->memory[i * 4 + 0xFE00 + 2], gb->memory[i * 4 + 0xFE00 + 3]}); //I'm stupid... How did I manage to forget to change the byte?
         }
     }
 }
@@ -103,6 +105,23 @@ void Ppu::loadObjects() {
             uint16_t addr = 0x8000 + tile * 16 + row * 2;
             uint8_t lo = gb->readMemory(addr, false, true);
             uint8_t hi = gb->readMemory(addr + 1, false, true);
+
+            for (int px = 0; px < 8; px++) {
+                int x = obj.X - 8 + px;
+
+                int bit = getBit(obj.flags, 5) ? px : 7 - px;
+                int id = (((hi >> bit) & 1) << 1) | ((lo >> bit) & 1);
+
+                if (id == 0 || claimed[x]) {
+                    continue;
+                }
+                claimed[x] = true;
+
+                if (getBit(obj.flags, 7) && bg_colour_id[x] != 0) {
+                    continue;
+                }
+                frame_buffer[LY * 160 + x] = palette[(pal >> (id * 2)) & 3];
+            }
         }
     }
 }

@@ -23,6 +23,7 @@ class Ppu {
     public:
         uint32_t palette[4] = {0xE0F8D0FF, 0x88C070FF, 0x346856FF, 0x081820FF};
         uint32_t frame_buffer[160 * 144];
+        uint8_t bg_colour_id[160];
         std::vector<Object> objects_buffer; //Stores up to 10 sprites
 
         uint8_t LCDC; //FF40

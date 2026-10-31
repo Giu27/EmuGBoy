@@ -5,9 +5,12 @@
 #include "imgui_memory_editor.h"
 #include <SDL3/SDL.h>
 #include <iostream>
+#include <chrono>
+#include <thread>
 #include <utils.h>
 #include <gb.h>
 
+using clock_t_ = std::chrono::steady_clock;
 static MemoryEditor mem_edit;
 
 int getKey(SDL_Scancode scancode);
@@ -70,10 +73,13 @@ int main(int, char**) {
     //setup GB Emu
     Gb gb;
     gb.loadBootRom("roms/bootrom.bin");
-    gb.loadRom("roms\\tetris.gb");
+    gb.loadRom("roms\\tloz.gb");
     int cycles = 0;
     int cycles_this_frame = 0;
-    int cycles_per_frame = 70224;
+    const int cycles_per_frame = 70224;
+
+    constexpr auto FRAME_TIME = std::chrono::nanoseconds((long long)(1e9 * cycles_per_frame / 4194304.0));  // ~16.74 ms
+    auto next_frame = clock_t_::now();
 
     // Main loop
     bool done = false;
@@ -215,6 +221,9 @@ int main(int, char**) {
         SDL_RenderClear(renderer);
         ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
         SDL_RenderPresent(renderer);
+
+        next_frame += FRAME_TIME;
+        std::this_thread::sleep_until(next_frame);
     }
 
     // Loop end
